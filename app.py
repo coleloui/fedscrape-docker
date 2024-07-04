@@ -5,6 +5,7 @@ import unicodedata
 import pandas as pd
 from bs4 import BeautifulSoup
 import requests
+import numpy as np
 
 # Fed URL
 URL = "https://www.federalreserve.gov/releases/h15/"
@@ -66,7 +67,7 @@ def table_constructor(data):
         else:
             linked.append(holding)
             holding = []
-    print(len(linked))
+
     #         try:
     #             float(text_string)
     #             # if so convert the value and add to list
@@ -113,7 +114,7 @@ table_data = html_data.findChildren("tr")
 
 # call our custom function to constuct our table data
 table_data_dict = table_constructor(table_data)
-# print(table_data_dict)
+print(table_data_dict)
 
 
 # create a csv with the constructed data from our function
