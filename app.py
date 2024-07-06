@@ -18,86 +18,70 @@ def table_constructor(data):
     to be made into a csv"""
 
     # Function variables
-    table_dict = {
-        "Date": [],
-        "Federal funds": [],
-        "Commercial Paper - Nonfinancial - 1 Month": [],
-        "Commercial Paper - Nonfinancial - 2 Month": [],
-        "Commercial Paper - Nonfinancial - 3 Month": [],
-        "Commercial Paper - Financial - 1 Month": [],
-        "Commercial Paper - Financial - 2 Month": [],
-        "Commercial Paper - Financial - 3 Month": [],
-        "Bank prime loan": [],
-        "Discount window primary credit": [],
-        "U.S. gov securities - Tresury bills - 4 week": [],
-        "U.S. gov securities - Tresury bills - 3 month": [],
-        "U.S. gov securities - Tresury bills - 6 month": [],
-        "U.S. gov securities - Tresury bills - 1 year": [],
-        "U.S. gov securities - Tresury constant maturities - Nominal 9 - 1 month": [],
-        "U.S. gov securities - Tresury constant maturities - Nominal 9 - 3 month": [],
-        "U.S. gov securities - Tresury constant maturities - Nominal 9 - 6 month": [],
-        "U.S. gov securities - Tresury constant maturities - Nominal 9 - 1 year": [],
-        "U.S. gov securities - Tresury constant maturities - Nominal 9 - 2 year": [],
-        "U.S. gov securities - Tresury constant maturities - Nominal 9 - 3 year": [],
-        "U.S. gov securities - Tresury constant maturities - Nominal 9 - 5 year": [],
-        "U.S. gov securities - Tresury constant maturities - Nominal 9 - 7 year": [],
-        "U.S. gov securities - Tresury constant maturities - Nominal 9 - 10 year": [],
-        "U.S. gov securities - Tresury constant maturities - Nominal 9 - 20 year": [],
-        "U.S. gov securities - Tresury constant maturities - Nominal 9 - 30 year": [],
-        "U.S. gov securities - Tresury constant maturities - Inflation indexed - 5 year": [],
-        "U.S. gov securities - Tresury constant maturities - Inflation indexed - 7 year": [],
-        "U.S. gov securities - Tresury constant maturities - Inflation indexed - 10 year": [],
-        "U.S. gov securities - Tresury constant maturities - Inflation indexed - 20 year": [],
-        "U.S. gov securities - Tresury constant maturities - Inflation indexed - 30 year": [],
-        "U.S. gov securities - Inflation-indexed long-term average": [],
-    }
-
-    # use keys in table_dict to place data
+    table_column = [
+        "Date",
+        "Federal funds",
+        "Commercial Paper - Nonfinancial - 1 Month",
+        "Commercial Paper - Nonfinancial - 2 Month",
+        "Commercial Paper - Nonfinancial - 3 Month",
+        "Commercial Paper - Financial - 1 Month",
+        "Commercial Paper - Financial - 2 Month",
+        "Commercial Paper - Financial - 3 Month",
+        "Bank prime loan",
+        "Discount window primary credit",
+        "U.S. gov securities - Tresury bills - 4 week",
+        "U.S. gov securities - Tresury bills - 3 month",
+        "U.S. gov securities - Tresury bills - 6 month",
+        "U.S. gov securities - Tresury bills - 1 year",
+        "U.S. gov securities - Tresury constant maturities - Nominal 9 - 1 month",
+        "U.S. gov securities - Tresury constant maturities - Nominal 9 - 3 month",
+        "U.S. gov securities - Tresury constant maturities - Nominal 9 - 6 month",
+        "U.S. gov securities - Tresury constant maturities - Nominal 9 - 1 year",
+        "U.S. gov securities - Tresury constant maturities - Nominal 9 - 2 year",
+        "U.S. gov securities - Tresury constant maturities - Nominal 9 - 3 year",
+        "U.S. gov securities - Tresury constant maturities - Nominal 9 - 5 year",
+        "U.S. gov securities - Tresury constant maturities - Nominal 9 - 7 year",
+        "U.S. gov securities - Tresury constant maturities - Nominal 9 - 10 year",
+        "U.S. gov securities - Tresury constant maturities - Nominal 9 - 20 year",
+        "U.S. gov securities - Tresury constant maturities - Nominal 9 - 30 year",
+        "U.S. gov securities - Tresury constant maturities - Inflation indexed - 5 year",
+        "U.S. gov securities - Tresury constant maturities - Inflation indexed - 7 year",
+        "U.S. gov securities - Tresury constant maturities - Inflation indexed - 10 year",
+        "U.S. gov securities - Tresury constant maturities - Inflation indexed - 20 year",
+        "U.S. gov securities - Tresury constant maturities - Inflation indexed - 30 year",
+        "U.S. gov securities - Inflation-indexed long-term average",
+    ]
+    # use keys to place data
     linked = []
     holding = []
-    for value in data:
-        for j, item in enumerate(value):
-            text_string = unicodedata.normalize("NFKD", item.text).rstrip()
-            if int((j - 1) / 2) == 0 or j % 2 == 0 or text_string == "":
-                continue
-            else:
-                holding.append(text_string.strip())
-        if len(holding) == 0:
+    # indecies to skip for no informtaion
+    # we use this because it is possible for no data to exist
+    # in a column but these rows specificially do not ever contain data
+    skip = [2, 3, 7, 13, 14, 19, 20, 32]
+
+    for i, value in enumerate(data):
+        if i in skip:
             continue
         else:
-            linked.append(holding)
-            holding = []
+            for j, item in enumerate(value):
+                text_string = unicodedata.normalize("NFKD", item.text).strip()
+                if int((j - 1) / 2) == 0 or j % 2 == 0:
+                    continue
+                else:
+                    try:
+                        float(text_string)
+                        holding.append(float(text_string))
+                    except ValueError:
+                        holding.append(text_string)
+            if len(holding) == 0:
+                continue
+            else:
+                linked.append(holding)
+                holding = []
 
-    #         try:
-    #             float(text_string)
-    #             # if so convert the value and add to list
-    #             table_dict[int((j - 1) / 2)].append(float(text_string))
-    #         # if not append the string
-    #         except ValueError:
-    #             table_dict[int((j - 1) / 2)].append(text_string)
-
-    # Loop through list of list to obtain and sanitize each value
-    # so that if it is a number it is a float and a string is a string
-    # for i, item in enumerate(data):
-
-    # text_string = unicodedata.normalize("NFKD", item.text).rstrip()
-
-    # if text_string == "\n":
-    #     continue
-    # else:
-    #     # Sanitize value to get the base text
-    #     # check to see if the value is a float
-    #     try:
-    #         float(text_string)
-    #         # if so convert the value and add to list
-    #         table_dict[i].append(float(text_string))
-    #     # if not append the string
-    #     except ValueError:
-    #         table_dict[i].append(text_string)
-    # append the list that is each row of the table to the overall table data
-
-    # Return list of lists that contain the sanitized values
-    return table_dict
+    data_dict = dict(zip(table_column, linked))
+    df = pd.DataFrame(data=data_dict, index=None)
+    return df
 
 
 # request the html from the website
@@ -108,14 +92,11 @@ doc = BeautifulSoup(result.text, "html.parser")
 html_data = doc.find(id="h15table")
 table_data = html_data.findChildren("tr")
 
-
-# dfs = pd.read_html(URL})
-# print(len(dfs))
-
 # call our custom function to constuct our table data
-table_data_dict = table_constructor(table_data)
-print(table_data_dict)
-
+table_df = table_constructor(table_data)
+# retreive exsiting data
+csv_df = pd.DataFrame.read_csv("./data.csv")
+print(csv_df)
 
 # create a csv with the constructed data from our function
 # with open("data.csv", "a+", newline="", encoding="utf-8") as file:

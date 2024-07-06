@@ -1,39 +1,6 @@
-Instruments,2024Jun24,2024Jun25,2024Jun26,2024Jun27,2024Jun28
-Federal funds (effective) 1 2 3,5.33,5.33,5.33,5.33,5.33
-Commercial Paper 3 4 5 6,,,,,
-Nonfinancial,,,,,
-1-month,5.31,5.31, n.a., n.a.,5.32
-2-month, n.a.,5.33, n.a.,5.33, n.a.
-3-month, n.a., n.a., n.a.,5.34, n.a.
-Financial,,,,,
-1-month, n.a.,5.3, n.a., n.a., n.a.
-2-month, n.a., n.a., n.a., n.a., n.a.
-3-month, n.a.,5.27,5.26,5.26, n.a.
-Bank prime loan 2 3 7,8.5,8.5,8.5,8.5,8.5
-Discount window primary credit 2 8,5.5,5.5,5.5,5.5,5.5
-U.S. government securities,,,,,
-Treasury bills (secondary market) 3 4,,,,,
-4-week,5.22,5.23,5.24,5.27,5.27
-3-month,5.24,5.23,5.24,5.23,5.22
-6-month,5.14,5.14,5.14,5.12,5.11
-1-year,4.86,4.86,4.89,4.87,4.86
-Treasury constant maturities,,,,,
-Nominal 9,,,,,
-1-month,5.42,5.43,5.44,5.48,5.47
-3-month,5.5,5.49,5.5,5.49,5.48
-6-month,5.37,5.37,5.36,5.35,5.33
-1-year,5.1,5.1,5.13,5.1,5.09
-2-year,4.71,4.65,4.71,4.7,4.71
-3-year,4.46,4.45,4.53,4.49,4.52
-5-year,4.27,4.25,4.32,4.29,4.33
-7-year,4.25,4.23,4.32,4.27,4.33
-10-year,4.25,4.23,4.32,4.29,4.36
-20-year,4.48,4.46,4.55,4.53,4.61
-30-year,4.38,4.36,4.45,4.43,4.51
-Inflation indexed 10,,,,,
-5-year,2.09,2.08,2.12,2.07,2.09
-7-year,2.05,2.04,2.08,2.04,2.08
-10-year,2.03,2.01,2.06,2.03,2.08
-20-year,2.08,2.06,2.11,2.09,2.16
-30-year,2.14,2.12,2.17,2.15,2.23
-Inflation-indexed long-term average 11,2.15,2.13,2.18,2.16,2.24
+"Date","Federal funds","Commercial Paper - Nonfinancial - 1 Month","Commercial Paper - Nonfinancial - 2 Month","Commercial Paper - Nonfinancial - 3 Month","Commercial Paper - Financial - 1 Month","Commercial Paper - Financial - 2 Month","Commercial Paper - Financial - 3 Month","Bank prime loan","Discount window primary credit","U.S. gov securities - Tresury bills - 4 week","U.S. gov securities - Tresury bills - 3 month","U.S. gov securities - Tresury bills - 6 month","U.S. gov securities - Tresury bills - 1 year","U.S. gov securities - Tresury constant maturities - Nominal 9 - 1 month","U.S. gov securities - Tresury constant maturities - Nominal 9 - 3 month","U.S. gov securities - Tresury constant maturities - Nominal 9 - 6 month","U.S. gov securities - Tresury constant maturities - Nominal 9 - 1 year","U.S. gov securities - Tresury constant maturities - Nominal 9 - 2 year","U.S. gov securities - Tresury constant maturities - Nominal 9 - 3 year","U.S. gov securities - Tresury constant maturities - Nominal 9 - 5 year","U.S. gov securities - Tresury constant maturities - Nominal 9 - 7 year","U.S. gov securities - Tresury constant maturities - Nominal 9 - 10 year","U.S. gov securities - Tresury constant maturities - Nominal 9 - 20 year","U.S. gov securities - Tresury constant maturities - Nominal 9 - 30 year","U.S. gov securities - Tresury constant maturities - Inflation indexed - 5 year","U.S. gov securities - Tresury constant maturities - Inflation indexed - 7 year","U.S. gov securities - Tresury constant maturities - Inflation indexed - 10 year","U.S. gov securities - Tresury constant maturities - Inflation indexed - 20 year","U.S. gov securities - Tresury constant maturities - Inflation indexed - 30 year","U.S. gov securities - Inflation-indexed long-term average",
+2024Jun24,5.33,5.31,n.a.,n.a.,n.a.,n.a.,n.a.,8.5,5.5,5.22,5.24,5.14,4.86,5.42,5.5,5.37,5.1,4.71,4.46,4.27,4.25,4.25,4.48,4.38,2.09,2.05,2.03,2.08,2.14,2.15
+2024Jun25,5.33,5.31,5.33,n.a.,5.3,n.a.,5.27,8.5,5.5,5.23,5.23,5.14,4.86,5.43,5.49,5.37,5.1,4.65,4.45,4.25,4.23,4.23,4.46,4.36,2.08,2.04,2.01,2.06,2.12,2.13
+2024Jun26,5.33,n.a.,n.a.,n.a.,n.a.,n.a.,5.26,8.5,5.5,5.24,5.24,5.14,4.89,5.44,5.5,5.36,5.13,4.71,4.53,4.32,4.32,4.32,4.55,4.45,2.12,2.08,2.06,2.11,2.17,2.18
+2024Jun27,5.33,n.a.,5.33,5.34,n.a.,n.a.,5.26,8.5,5.5,5.27,5.23,5.12,4.87,5.48,5.49,5.35,5.1,4.7,4.49,4.29,4.27,4.29,4.53,4.43,2.07,2.04,2.03,2.09,2.15,2.16
+2024Jun28,5.33,5.32,n.a.,n.a.,n.a.,n.a.,n.a.,8.5,5.5,5.27,5.22,5.11,4.86,5.47,5.48,5.33,5.09,4.71,4.52,4.33,4.33,4.36,4.61,4.51,2.09,2.08,2.08,2.16,2.23,2.24
