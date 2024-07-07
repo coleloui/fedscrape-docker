@@ -91,12 +91,14 @@ doc = BeautifulSoup(result.text, "html.parser")
 # find all of the table rows in the parsed HTML document
 html_data = doc.find(id="h15table")
 table_data = html_data.findChildren("tr")
+# test = pd.read_html(html_data)
+print(type(html_data))
 
-# call our custom function to constuct our table data
-table_df = table_constructor(table_data)
-# retreive exsiting data
-csv_df = pd.DataFrame.read_csv("./data.csv")
-print(csv_df)
+# call our custom function to constuct a DataFrame
+# table_df = table_constructor(table_data)
+# # conver DataFrame to CSV
+# table_df.to_csv("data2.csv", index=False)
+
 
 # create a csv with the constructed data from our function
 # with open("data.csv", "a+", newline="", encoding="utf-8") as file:
