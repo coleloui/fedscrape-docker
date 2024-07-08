@@ -1,5 +1,7 @@
 beautifulsoup4
+boto
 html5lib
 lxml
 pandas
+python-dotenv
 requests

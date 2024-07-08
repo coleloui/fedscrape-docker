@@ -1,87 +1,34 @@
 """Scrape fed rate"""
 
-import csv
-import unicodedata
-import pandas as pd
+# os import
+import os
+
+# package import
 from bs4 import BeautifulSoup
 import requests
-import numpy as np
+from dotenv import load_dotenv
+from boto.s3.connection import S3Connection
+from boto.s3.key import Key
+
+# function import
+from table_build import table_constructor
+
+
+load_dotenv()
+
+# secure variables
+aws_key = os.getenv("AWS_KEY")
+aws_secret = os.getenv("AWS_SECRET")
+s3bucket = os.getenv("S3_BUCKET")
+
+# aws connection
+aws_connection = S3Connection(aws_key, aws_secret)
+bucket = aws_connection.get_bucket(s3bucket)
+k = Key(bucket)
+k.key = "data"
 
 # Fed URL
 URL = "https://www.federalreserve.gov/releases/h15/"
-# URL = "https://en.wikipedia.org/wiki/History_of_Python"
-
-
-def table_constructor(data):
-    """Function to take html data and convert it into a
-    list of lists with the intention of returning these
-    to be made into a csv"""
-
-    # Function variables
-    table_column = [
-        "Date",
-        "Federal funds",
-        "Commercial Paper - Nonfinancial - 1 Month",
-        "Commercial Paper - Nonfinancial - 2 Month",
-        "Commercial Paper - Nonfinancial - 3 Month",
-        "Commercial Paper - Financial - 1 Month",
-        "Commercial Paper - Financial - 2 Month",
-        "Commercial Paper - Financial - 3 Month",
-        "Bank prime loan",
-        "Discount window primary credit",
-        "U.S. gov securities - Tresury bills - 4 week",
-        "U.S. gov securities - Tresury bills - 3 month",
-        "U.S. gov securities - Tresury bills - 6 month",
-        "U.S. gov securities - Tresury bills - 1 year",
-        "U.S. gov securities - Tresury constant maturities - Nominal 9 - 1 month",
-        "U.S. gov securities - Tresury constant maturities - Nominal 9 - 3 month",
-        "U.S. gov securities - Tresury constant maturities - Nominal 9 - 6 month",
-        "U.S. gov securities - Tresury constant maturities - Nominal 9 - 1 year",
-        "U.S. gov securities - Tresury constant maturities - Nominal 9 - 2 year",
-        "U.S. gov securities - Tresury constant maturities - Nominal 9 - 3 year",
-        "U.S. gov securities - Tresury constant maturities - Nominal 9 - 5 year",
-        "U.S. gov securities - Tresury constant maturities - Nominal 9 - 7 year",
-        "U.S. gov securities - Tresury constant maturities - Nominal 9 - 10 year",
-        "U.S. gov securities - Tresury constant maturities - Nominal 9 - 20 year",
-        "U.S. gov securities - Tresury constant maturities - Nominal 9 - 30 year",
-        "U.S. gov securities - Tresury constant maturities - Inflation indexed - 5 year",
-        "U.S. gov securities - Tresury constant maturities - Inflation indexed - 7 year",
-        "U.S. gov securities - Tresury constant maturities - Inflation indexed - 10 year",
-        "U.S. gov securities - Tresury constant maturities - Inflation indexed - 20 year",
-        "U.S. gov securities - Tresury constant maturities - Inflation indexed - 30 year",
-        "U.S. gov securities - Inflation-indexed long-term average",
-    ]
-    # use keys to place data
-    linked = []
-    holding = []
-    # indecies to skip for no informtaion
-    # we use this because it is possible for no data to exist
-    # in a column but these rows specificially do not ever contain data
-    skip = [2, 3, 7, 13, 14, 19, 20, 32]
-
-    for i, value in enumerate(data):
-        if i in skip:
-            continue
-        else:
-            for j, item in enumerate(value):
-                text_string = unicodedata.normalize("NFKD", item.text).strip()
-                if int((j - 1) / 2) == 0 or j % 2 == 0:
-                    continue
-                else:
-                    try:
-                        float(text_string)
-                        holding.append(float(text_string))
-                    except ValueError:
-                        holding.append(text_string)
-            if len(holding) == 0:
-                continue
-            else:
-                linked.append(holding)
-                holding = []
-
-    data_dict = dict(zip(table_column, linked))
-    df = pd.DataFrame(data=data_dict, index=None)
-    return df
 
 
 # request the html from the website
@@ -91,16 +38,11 @@ doc = BeautifulSoup(result.text, "html.parser")
 # find all of the table rows in the parsed HTML document
 html_data = doc.find(id="h15table")
 table_data = html_data.findChildren("tr")
-# test = pd.read_html(html_data)
-print(type(html_data))
 
 # call our custom function to constuct a DataFrame
-# table_df = table_constructor(table_data)
-# # conver DataFrame to CSV
-# table_df.to_csv("data2.csv", index=False)
+table_df = table_constructor(table_data)
+# conver DataFrame to CSV
+table_df.to_csv("data.csv", index=False)
 
-
-# create a csv with the constructed data from our function
-# with open("data.csv", "a+", newline="", encoding="utf-8") as file:
-#     writer = csv.writer(file)
-#     writer.writerows(table_data_array)
+# call funtion to send the CSV to S3 bucket
+k.set_contents_from_filename("./data.csv")
