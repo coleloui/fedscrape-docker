@@ -1,5 +1,6 @@
 """File for table_constructor fundtion"""
 
+# package import
 import unicodedata
 import pandas as pd
 
@@ -10,6 +11,7 @@ def table_constructor(data):
     to be made into a csv"""
 
     # Function variables
+    # this is the title of the columns we will be using in snowflake to match our data
     table_column = [
         "Date",
         "Federal funds",
@@ -45,32 +47,43 @@ def table_constructor(data):
     ]
     # use keys to place data
     linked = []
-    holding = []
+    row_data = []
+
     # indecies to skip for no informtaion
     # we use this because it is possible for no data to exist
     # in a column but these rows specificially do not ever contain data
     skip = [2, 3, 7, 13, 14, 19, 20, 32]
 
     for i, value in enumerate(data):
+        # if the current index is in a row that we dont need data from we skip it
         if i in skip:
             continue
         else:
             for j, item in enumerate(value):
+                # sanitize all data to get the raw string
                 text_string = unicodedata.normalize("NFKD", item.text).strip()
+                # these removes any data that isnt there or is a new line
                 if int((j - 1) / 2) == 0 or j % 2 == 0:
                     continue
                 else:
+                    # try and make the data into a float, if so add the float to the row_data list
                     try:
                         float(text_string)
-                        holding.append(float(text_string))
+                        row_data.append(float(text_string))
+                        # if the data is not a float add it as a string to the row_data list
                     except ValueError:
-                        holding.append(text_string)
-            if len(holding) == 0:
+                        row_data.append(text_string)
+            # if the row_data list is empty move to the next
+            if len(row_data) == 0:
                 continue
+            # if the row_data list has values add them to the linked list
+            # set the row_data to an empty list for the next row
             else:
-                linked.append(holding)
-                holding = []
+                linked.append(row_data)
+                row_data = []
 
+    # create a dictionary by zipping the table_column list to the linked list
     data_dict = dict(zip(table_column, linked))
+    # create a Data Frame from the previously created dictionary
     df = pd.DataFrame(data=data_dict, index=None)
     return df
