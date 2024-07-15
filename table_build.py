@@ -6,9 +6,8 @@ import pandas as pd
 
 
 def table_constructor(data):
-    """Function to take html data and convert it into a
-    list of lists with the intention of returning these
-    to be made into a csv"""
+    """Function to take html data and convert it into a list of lists
+    with the intention of returning these to be made into a csv"""
 
     # Function variables
     # this is the title of the columns we will be using in snowflake to match our data
@@ -49,9 +48,8 @@ def table_constructor(data):
     linked = []
     row_data = []
 
-    # indecies to skip for no informtaion
-    # we use this because it is possible for no data to exist
-    # in a column but these rows specificially do not ever contain data
+    # indecies to skip for no informtaion we use this because it is possible for
+    # no data to existin a column but these rows specificially do not ever contain data
     skip = [2, 3, 7, 13, 14, 19, 20, 32]
 
     for i, value in enumerate(data):
@@ -66,13 +64,8 @@ def table_constructor(data):
                 if int((j - 1) / 2) == 0 or j % 2 == 0:
                     continue
                 else:
-                    # try and make the data into a float, if so add the float to the row_data list
-                    try:
-                        float(text_string)
-                        row_data.append(float(text_string))
-                        # if the data is not a float add it as a string to the row_data list
-                    except ValueError:
-                        row_data.append(text_string)
+                    # add the string to the row_data list
+                    row_data.append(text_string)
             # if the row_data list is empty move to the next
             if len(row_data) == 0:
                 continue
