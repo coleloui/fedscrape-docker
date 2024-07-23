@@ -1,8 +1,34 @@
-"""File for table_constructor fundtion"""
+"""script for scraping data from fed interest rate table and formatting"""
 
 # package import
 import unicodedata
 import pandas as pd
+from bs4 import BeautifulSoup
+import requests
+
+
+def scrape_data():
+    """Function to fetch web scraped data from federal reserve"""
+
+    # Fed URL
+    url = "https://www.federalreserve.gov/releases/h15/"
+
+    # request the html from the website
+    result = requests.get(url, timeout=30)
+
+    # use Beautiful Soup to parse the HTML
+    doc = BeautifulSoup(result.text, "html.parser")
+
+    # find all of the table rows in the parsed HTML document
+    html_data = doc.find(id="h15table")
+    table_data = html_data.findChildren("tr")
+
+    # call our custom function to constuct a DataFrame
+    table_df = table_constructor(table_data)
+    # conver DataFrame to CSV
+    table_df.to_csv("data/scrape/scrape.csv", index=False)
+
+    return "data/scrape"
 
 
 def table_constructor(data):

@@ -1,5 +1,6 @@
-"""This is used to pull data from the Fed."""
+"""Script to download csv files of fed interest rate data."""
 
+# package import
 from concurrent.futures import ThreadPoolExecutor
 import requests
 
@@ -74,6 +75,7 @@ def download_file(data):
         return
 
 
-# Iterate through URL dict and pass tuple to the download file function
-with ThreadPoolExecutor() as executor:
-    executor.map(download_file, URLS.items())
+def bulk_download():
+    """Function to iterate through URL dict and pass tuple to the download file function"""
+    with ThreadPoolExecutor() as executor:
+        executor.map(download_file, URLS.items())
