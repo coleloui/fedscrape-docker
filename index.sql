@@ -7,7 +7,7 @@ CREATE OR REPLACE SCHEMA FED_DB.file_formats;
 CREATE OR REPLACE file format FED_DB.file_formats.csv_fileformat
     type = csv
     field_delimiter = ','
-    skip_header = 1
+    skip_header = 6
     null_if = ('NULL', 'null')
     empty_field_as_null = FALSE;
 

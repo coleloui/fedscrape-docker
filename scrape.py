@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 import requests
 
 # function import
-from upload import upload_scrape
+from upload import upload_scrape, test_connection
 
 
 def table_constructor(data):
@@ -109,8 +109,8 @@ def scrape_data():
     table_df.to_csv("scrape/scrape.csv", index=False)
     print("scraped data in directory scrape")
 
-    # upload_scrape()
-    return True
+    if test_connection():
+        upload_scrape()
 
 
 scrape_data()

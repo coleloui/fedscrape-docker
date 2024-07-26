@@ -83,7 +83,7 @@ def bulk_download():
     with ThreadPoolExecutor() as executor:
         executor.map(download_file, URLS.items())
 
-    # upload_download()
+    upload_download()
 
 
 bulk_download()
