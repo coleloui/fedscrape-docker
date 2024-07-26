@@ -6,29 +6,8 @@ import pandas as pd
 from bs4 import BeautifulSoup
 import requests
 
-
-def scrape_data():
-    """Function to fetch web scraped data from federal reserve"""
-
-    # Fed URL
-    url = "https://www.federalreserve.gov/releases/h15/"
-
-    # request the html from the website
-    result = requests.get(url, timeout=30)
-
-    # use Beautiful Soup to parse the HTML
-    doc = BeautifulSoup(result.text, "html.parser")
-
-    # find all of the table rows in the parsed HTML document
-    html_data = doc.find(id="h15table")
-    table_data = html_data.findChildren("tr")
-
-    # call our custom function to constuct a DataFrame
-    table_df = table_constructor(table_data)
-    # conver DataFrame to CSV
-    table_df.to_csv("data/scrape/scrape.csv", index=False)
-
-    return "data/scrape"
+# function import
+from upload import upload_scrape
 
 
 def table_constructor(data):
@@ -106,3 +85,32 @@ def table_constructor(data):
     # create a Data Frame from the previously created dictionary
     df = pd.DataFrame(data=data_dict, index=None)
     return df
+
+
+def scrape_data():
+    """Function to fetch web scraped data from federal reserve"""
+
+    # Fed URL
+    url = "https://www.federalreserve.gov/releases/h15/"
+
+    # request the html from the website
+    result = requests.get(url, timeout=30)
+
+    # use Beautiful Soup to parse the HTML
+    doc = BeautifulSoup(result.text, "html.parser")
+
+    # find all of the table rows in the parsed HTML document
+    html_data = doc.find(id="h15table")
+    table_data = html_data.findChildren("tr")
+
+    # call our custom function to constuct a DataFrame
+    table_df = table_constructor(table_data)
+    # conver DataFrame to CSV
+    table_df.to_csv("scrape/scrape.csv", index=False)
+    print("scraped data in directory scrape")
+
+    # upload_scrape()
+    return True
+
+
+scrape_data()

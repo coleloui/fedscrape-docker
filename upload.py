@@ -22,13 +22,17 @@ k = Key(bucket)
 k.key = "data"
 
 
-# call funtion to send the CSV to S3 bucket
-k.set_contents_from_filename("./data.csv")
-
-
-def upload_directory():
-    """upload directory"""
-    for root, dirs, files in os.walk("data"):
+def upload_download():
+    """upload the download directory and all included directories"""
+    for root, dirs, files in os.walk("download"):
         print(root, dirs, files)
-        # for file in files:
+        for file in files:
+            if file == ".gitkeep":
+                continue
         #     k.set_contents_from_filename(os.path.join(root, file))
+
+
+def upload_scrape():
+    """upload scraped csv"""
+    # call funtion to send the CSV to S3 bucket
+    k.set_contents_from_filename("./scrape/scrape.csv")
