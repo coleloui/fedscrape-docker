@@ -85,6 +85,3 @@ def bulk_download():
 
     if test_connection():
         upload_download()
-
-
-bulk_download()
