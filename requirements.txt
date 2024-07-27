@@ -1,5 +1,5 @@
 beautifulsoup4
-boto
+boto3
 html5lib
 lxml
 pandas

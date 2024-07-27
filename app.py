@@ -14,3 +14,7 @@ from request_data import bulk_download
 # python package
 # click
 # streamlit
+
+
+scrape_data()
+bulk_download()

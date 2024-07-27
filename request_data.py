@@ -5,7 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 import requests
 
 # function import
-from upload import upload_download
+from upload import upload_download, test_connection
 
 # Base URL that gets formatted for the respective and rate and date
 BASE_URL = (
@@ -83,7 +83,8 @@ def bulk_download():
     with ThreadPoolExecutor() as executor:
         executor.map(download_file, URLS.items())
 
-    upload_download()
+    if test_connection():
+        upload_download()
 
 
 bulk_download()

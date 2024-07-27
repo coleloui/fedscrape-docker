@@ -4,30 +4,45 @@
 import os
 
 # package import
+import boto3.session
+import botocore.exceptions
 from dotenv import load_dotenv
-from boto.s3.connection import S3Connection
-from boto.s3.key import Key
+import boto3
 
 load_dotenv()
 
 # secure variables
 aws_key = os.getenv("AWS_KEY")
 aws_secret = os.getenv("AWS_SECRET")
+aws_region = os.getenv("AWS_REGION")
 s3bucket = os.getenv("S3_BUCKET")
 
 # aws connection
-aws_connection = S3Connection(aws_key, aws_secret)
-bucket = aws_connection.get_bucket(s3bucket)
-k = Key(bucket)
+aws_session = boto3.session.Session(
+    region_name=aws_region,
+    aws_access_key_id=aws_key,
+    aws_secret_access_key=aws_secret,
+)
+s3 = aws_session.resource("s3")
 
 
 def test_connection():
     """This function tests our S3 connection.
     If it exists it will allow users to save files to their S3"""
-    if aws_connection:
+    try:
+        s3.meta.client.head_bucket(Bucket=s3bucket)
         return True
-    else:
-        return False
+    except botocore.exceptions.ClientError as e:
+        error_code = int(e.response["Error"]["Code"])
+        if error_code == 403:
+            print("Forbidden Access")
+            return False
+        elif error_code == 404:
+            print("Bucket Doenst Exist")
+            return False
+        else:
+            print("No Connection")
+            return False
 
 
 def upload_download():
@@ -38,15 +53,16 @@ def upload_download():
                 continue
             else:
                 current_directory = root.split("\\").pop(-1)
-                k.key = f"data/{current_directory}/{file}"
-                k.set_contents_from_filename(os.path.join(root, file))
+                s3.Object(s3bucket, f"data/{current_directory}/{file}").put(
+                    Body=open(os.path.join(root, file), "rb")
+                )
+                print("upload complete")
 
 
 def upload_scrape():
     """upload scraped csv"""
-    k.key = "data/scrape/scrape.csv"
     # call funtion to send the CSV to S3 bucket
-    k.set_contents_from_filename("scrape/scrape.csv")
-
-
-test_connection()
+    s3.Object(s3bucket, "data/scrape/scrape.csv").put(
+        Body=open("scrape/scrape.csv", "rb")
+    )
+    print("upload complete")
