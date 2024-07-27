@@ -167,3 +167,6 @@ scrape/*
 
 !download/*/.gitkeep
 !scrape/.gitkeep
+
+# alt vscode settings
+.vscode/

@@ -111,6 +111,3 @@ def scrape_data():
 
     if test_connection():
         upload_scrape()
-
-
-scrape_data()

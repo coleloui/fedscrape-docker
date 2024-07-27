@@ -30,7 +30,23 @@ $ touch .env && printf "AWS_KEY=\nAWS_SECRET=\nS3_BUCKET=" >> .env
 
 ### <ins>After the application has been set up choose which command to run</ins>
 
-Run both the Web Scrape and
+Run both the Web Scrape and Download
+
+```
+$ python3 app.py A
+```
+
+Run the Download functionality only
+
+```
+$ python3 app.py D
+```
+
+Run the Web Scrape functionality only
+
+```
+$ python3 app.py S
+```
 
 ## Setup
 
