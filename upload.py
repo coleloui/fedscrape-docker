@@ -4,10 +4,9 @@
 import os
 
 # package import
-import boto3.session
 import botocore.exceptions
 from dotenv import load_dotenv
-import boto3
+from boto3 import session
 
 load_dotenv()
 
@@ -18,7 +17,7 @@ aws_region = os.getenv("AWS_REGION")
 s3bucket = os.getenv("S3_BUCKET")
 
 # aws connection
-aws_session = boto3.session.Session(
+aws_session = session.Session(
     region_name=aws_region,
     aws_access_key_id=aws_key,
     aws_secret_access_key=aws_secret,

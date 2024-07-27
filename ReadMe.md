@@ -1,16 +1,42 @@
 # Federal Interest Rate Downloader
 
-This application is currently a work in progress. You must currently run either request_data.py or scrape.py individually.
+This application is currently a work in progress. The intention is to keep updated records of the Federal Interest Rates so that they may be easily referenced. Eventually the plan is to be able to view this data either in specific days or over periods of time as an average.
 
-This application is built with the intention of uploading to an S3 bucket, personally I have attached Snowflake and Snowpipe to this for auto loading. You dont need to do this but all of the Snowflake SQL queries will be in the .sql files.
+This application is built with the intention of uploading to an S3 bucket and then loading that data into Snowflake using Snowpipe. I have attached Snowflake queries in the .sql files. You do not need to connect to either of these, but the guide is in the [Setup](#setup) section.
 
-**YOU DO NOT NEED TO CONNECT TO A S3 BUCKET OR SNOWFLAKE FOR THIS APPLICATION TO RUN**
+To get started right away please view the [Quickstart](#Quickstart) section below
+
+## Quickstart
+
+### <ins>Enter the following commands in your terminal to set up the application from the root of the application</ins>
+
+Create and enter virtual environment
+
+```
+$ virtualenv -p python3 .venv && source .venv/bin/activate
+```
+
+Install packages
+
+```
+$ pip3 install -r requirements.txt
+```
+
+Create necessary files
+
+```
+$ touch .env && printf "AWS_KEY=\nAWS_SECRET=\nS3_BUCKET=" >> .env
+```
+
+### <ins>After the application has been set up choose which command to run</ins>
+
+Run both the Web Scrape and
 
 ## Setup
 
-### AWS S3
+### <ins>AWS S3</ins>
 
-To get this running you just need to run the script and you'll have that individual or group of csv's downloaded. For full functionality you need to create a .env file. Inside of this .env you will need the following
+To connect to AWS and your S3 bucket, you will need to go into the .env that you created from the quickstart and fill out your credentials.
 
 ```
 AWS_KEY=
@@ -18,12 +44,11 @@ AWS_SECRET=
 S3_BUCKET=
 ```
 
-your k.key in upload.py should be the directory in your s3 bucket where you want your file to end up.
+### <ins>Snowflake</ins>
 
-### Snowflake
+For Snowflake to tie into your S3 bucket you will need to create a Role in IAM for your bucket permissions and get your role arn.
 
-For Snowflake to tie into your S3 bucket you will need to create a role in IAM for your bucket permissions and get your role arn and then in
-Snowflake you need to set up your integration where you put in your arn and allowed locations. Run this SQL query and then describe your integration to obtain the STORAGE_AWS_EXTERNAL_ID from the result and your edit the trust relationship in your role in IAM to be the ExternalID.
+Query to set up your integration where you put in your arn and allowed locations.
 
 ```
 create or replace storage integration <title>
@@ -34,6 +59,8 @@ create or replace storage integration <title>
     STORAGE_ALLOWED_LOCATIONS = ('')
         COMMENT = 'This is the bucket for downloading data scraped from the fed interest rates';
 ```
+
+Query to describe your integration to obtain the STORAGE_AWS_EXTERNAL_ID from the result and your edit the trust relationship in your role in IAM to be the ExternalID.
 
 ```
 DESC integration <title>;
