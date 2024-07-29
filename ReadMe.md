@@ -28,24 +28,38 @@ Create necessary files
 $ touch .env && printf "AWS_KEY=\nAWS_SECRET=\nS3_BUCKET=" >> .env
 ```
 
-### <ins>After the application has been set up choose which command to run</ins>
+### As a Docker Container
 
-Run both the Web Scrape and Download
+FOR LOUIS - Move this to docker registry, so users can just pull image (like we pull centos or python), instead of build it locally
 
-```
-$ python3 app.py A
-```
-
-Run the Download functionality only
+To build a standalone container
 
 ```
-$ python3 app.py D
+docker build . -t fedscrape-docker:localhost
+docker run -t -d fedscrape-docker:localhost
 ```
 
-Run the Web Scrape functionality only
+Then to exec into Container, get the container id and exec in
 
 ```
-$ python3 app.py S
+docker container ls
+docker exec -it <CONTAINER_ID> /bin/bash
+```
+
+From here a user can execute the script as they would like
+
+```
+python app.py --all
+python app.py --scrape
+python app.py --download
+```
+
+### As a docker compose with DB
+
+Simply execute the compose to create DB container with python container
+
+```
+docker-compose up -d --build
 ```
 
 ## Setup
