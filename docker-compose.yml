@@ -4,18 +4,18 @@ services:
     depends_on:
       - database
     build:
-        context: ./
-        dockerfile: Dockerfile
-    environment:
-        AWS_KEY: ""
-        AWS_SECRET: ""
-        S3_BUCKET: ""
+      context: ./
+      dockerfile: Dockerfile
+    # environment:
+    #     AWS_KEY: ""
+    #     AWS_SECRET: ""
+    #     S3_BUCKET: ""
   database:
     image: docker.io/library/postgres:14
     environment:
-        POSTGRES_USER: "postgres"
-        POSTGRES_PASSWORD: "test"
-        POSTGRES_DB: "postgres"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "test"
+      POSTGRES_DB: "postgres"
     ports:
       - 15432:5432
     volumes:

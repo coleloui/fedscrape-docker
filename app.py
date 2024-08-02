@@ -8,7 +8,6 @@ from scrape import scrape_data
 from request_data import bulk_download
 
 # python package
-# update this script to use click instead of argv
 parser = argparse.ArgumentParser()
 
 
