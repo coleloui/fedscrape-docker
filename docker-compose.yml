@@ -6,10 +6,10 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile
-    # environment:
-    #     AWS_KEY: ""
-    #     AWS_SECRET: ""
-    #     S3_BUCKET: ""
+    environment:
+      AWS_KEY: ""
+      AWS_SECRET: ""
+      S3_BUCKET: ""
   database:
     image: docker.io/library/postgres:14
     environment:
