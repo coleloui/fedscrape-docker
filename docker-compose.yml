@@ -15,7 +15,7 @@ services:
     environment:
       POSTGRES_USER: 'postgres'
       POSTGRES_PASSWORD: 'test'
-      POSTGRES_DB: 'fed_scrape'
+      POSTGRES_DB: 'postgres'
     ports:
       - 15432:5432
     volumes:
