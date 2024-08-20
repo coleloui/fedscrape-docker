@@ -83,5 +83,7 @@ def bulk_download():
     with ThreadPoolExecutor() as executor:
         executor.map(download_file, URLS.items())
 
-    if test_connection():
+    if test_connection() == True:
         upload_download()
+    else:
+        return
