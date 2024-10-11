@@ -17,53 +17,52 @@ db_port = os.getenv("DB_PORT")
 connection = psycopg2.connect(
     f"dbname=postgres user={db_user} host=database password={db_password} port={db_port}"
 )
+cursor = connection.cursor()
 
 
 def build_scrape():
     """builds the scrape table in the postgres"""
-    cursor = connection.cursor()
 
     cursor.execute(
         """
         CREATE TABLE scrape (
         id SERIAL PRIMARY KEY UNIQUE NOT NULL,
         date DATE UNIQUE NOT NULL,
-        "Federal funds" VARCHAR(50) NOT NULL,
+        "Federal Funds" VARCHAR(50) NOT NULL,
         "Commercial Paper - Nonfinancial - 1 Month" VARCHAR(50) NOT NULL,
         "Commercial Paper - Nonfinancial - 2 Month" VARCHAR(50) NOT NULL,
         "Commercial Paper - Nonfinancial - 3 Month" VARCHAR(50) NOT NULL,
         "Commercial Paper - Financial - 1 Month" VARCHAR(50) NOT NULL,
         "Commercial Paper - Financial - 2 Month" VARCHAR(50) NOT NULL,
         "Commercial Paper - Financial - 3 Month" VARCHAR(50) NOT NULL,
-        "Bank prime loan" VARCHAR(50) NOT NULL,
-        "Discount window primary credit" VARCHAR(50) NOT NULL,
-        "U.S. gov - Bills - 4 week" VARCHAR(50) NOT NULL,
-        "U.S. gov - Bills - 3 month" VARCHAR(50) NOT NULL,
-        "U.S. gov - Bills - 6 month" VARCHAR(50) NOT NULL,
-        "U.S. gov - Bills - 1 year" VARCHAR(50) NOT NULL,
-        "U.S. gov - Maturities - Nominal 9 - 1 month" VARCHAR(50) NOT NULL,
-        "U.S. gov - Maturities - Nominal 9 - 3 month" VARCHAR(50) NOT NULL,
-        "U.S. gov - Maturities - Nominal 9 - 6 month" VARCHAR(50) NOT NULL,
-        "U.S. gov - Maturities - Nominal 9 - 1 year" VARCHAR(50) NOT NULL,
-        "U.S. gov - Maturities - Nominal 9 - 2 year" VARCHAR(50) NOT NULL,
-        "U.S. gov - Maturities - Nominal 9 - 3 year" VARCHAR(50) NOT NULL,
-        "U.S. gov - Maturities - Nominal 9 - 5 year" VARCHAR(50) NOT NULL,
-        "U.S. gov - Maturities - Nominal 9 - 7 year" VARCHAR(50) NOT NULL,
-        "U.S. gov - Maturities - Nominal 9 - 10 year" VARCHAR(50) NOT NULL,
-        "U.S. gov - Maturities - Nominal 9 - 20 year" VARCHAR(50) NOT NULL,
-        "U.S. gov - Maturities - Nominal 9 - 30 year" VARCHAR(50) NOT NULL,
-        "U.S. gov - Maturities - Inflation indexed - 5 year" VARCHAR(50) NOT NULL,
-        "U.S. gov - Maturities - Inflation indexed - 7 year" VARCHAR(50) NOT NULL,
-        "U.S. gov - Maturities - Inflation indexed - 10 year" VARCHAR(50) NOT NULL,
-        "U.S. gov - Maturities - Inflation indexed - 20 year" VARCHAR(50) NOT NULL,
-        "U.S. gov - Maturities - Inflation indexed - 30 year" VARCHAR(50) NOT NULL,
-        "U.S. gov - Inflation-indexed long-term average" VARCHAR(50) NOT NULL);"""
+        "Bank Prime Loan" VARCHAR(50) NOT NULL,
+        "Discount Window Primary Credit" VARCHAR(50) NOT NULL,
+        "U.S. Gov - Bills - 4 week" VARCHAR(50) NOT NULL,
+        "U.S. Gov - Bills - 3 month" VARCHAR(50) NOT NULL,
+        "U.S. Gov - Bills - 6 month" VARCHAR(50) NOT NULL,
+        "U.S. Gov - Bills - 1 year" VARCHAR(50) NOT NULL,
+        "U.S. Gov - Maturities - Nominal 9 - 1 month" VARCHAR(50) NOT NULL,
+        "U.S. Gov - Maturities - Nominal 9 - 3 month" VARCHAR(50) NOT NULL,
+        "U.S. Gov - Maturities - Nominal 9 - 6 month" VARCHAR(50) NOT NULL,
+        "U.S. Gov - Maturities - Nominal 9 - 1 year" VARCHAR(50) NOT NULL,
+        "U.S. Gov - Maturities - Nominal 9 - 2 year" VARCHAR(50) NOT NULL,
+        "U.S. Gov - Maturities - Nominal 9 - 3 year" VARCHAR(50) NOT NULL,
+        "U.S. Gov - Maturities - Nominal 9 - 5 year" VARCHAR(50) NOT NULL,
+        "U.S. Gov - Maturities - Nominal 9 - 7 year" VARCHAR(50) NOT NULL,
+        "U.S. Gov - Maturities - Nominal 9 - 10 year" VARCHAR(50) NOT NULL,
+        "U.S. Gov - Maturities - Nominal 9 - 20 year" VARCHAR(50) NOT NULL,
+        "U.S. Gov - Maturities - Nominal 9 - 30 year" VARCHAR(50) NOT NULL,
+        "U.S. Gov - Maturities - Inflation indexed - 5 year" VARCHAR(50) NOT NULL,
+        "U.S. Gov - Maturities - Inflation indexed - 7 year" VARCHAR(50) NOT NULL,
+        "U.S. Gov - Maturities - Inflation indexed - 10 year" VARCHAR(50) NOT NULL,
+        "U.S. Gov - Maturities - Inflation indexed - 20 year" VARCHAR(50) NOT NULL,
+        "U.S. Gov - Maturities - Inflation indexed - 30 year" VARCHAR(50) NOT NULL,
+        "U.S. Gov - Inflation-Indexed Long-Term Average" VARCHAR(50) NOT NULL);"""
     )
 
 
 def build_full():
     """Builds the full table range in database"""
-    cursor = connection.cursor()
 
     cursor.execute(
         """
@@ -127,6 +126,7 @@ def build_full():
     )
 
 
+build_scrape()
 connection.commit()
 cursor.close()
 connection.close()
