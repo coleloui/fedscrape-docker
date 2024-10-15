@@ -36,4 +36,7 @@ def insert_scrape():
     data.to_sql("scrape", con=conn, if_exists="append", index=False)
 
 
+cursor.close()
+connection.close()
+
 insert_scrape()
