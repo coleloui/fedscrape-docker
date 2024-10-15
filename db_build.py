@@ -66,10 +66,10 @@ def build_full():
 
     cursor.execute(
         """
-    CREATE TABLE federal_funds (
-      id SERIAL PRIMARY KEY UNIQUE,
-      date DATE UNIQUE NOT NULL,
-      rate VARCHAR(50) NOT NULL);
+    # CREATE TABLE federal_funds (
+    #     id SERIAL PRIMARY KEY UNIQUE,
+    #     date DATE UNIQUE NOT NULL,
+    #     rate VARCHAR(50) NOT NULL);
 
     CREATE TABLE commercial_paper_nonfinancial (
         id SERIAL PRIMARY KEY UNIQUE,
@@ -86,9 +86,9 @@ def build_full():
         three_month VARCHAR(50) NOT NULL);
     
     CREATE TABLE bank_prime_loan (
-      id SERIAL PRIMARY KEY UNIQUE,
-      date DATE UNIQUE NOT NULL,
-      rate VARCHAR(50) NOT NULL);
+        id SERIAL PRIMARY KEY UNIQUE,
+        date DATE UNIQUE NOT NULL,
+        rate VARCHAR(50) NOT NULL);
  
     CREATE TABLE discount_window_primary_credit (
         did SERIAL PRIMARY KEY UNIQUE,
@@ -103,7 +103,7 @@ def build_full():
         six_month VARCHAR(50) NOT NULL,
         one_year VARCHAR(50) NOT NULL);
     
-    CREATE TABLE maturties_nominal_9 (
+    CREATE TABLE maturities_nominal_9 (
         id SERIAL PRIMARY KEY UNIQUE,
         date DATE UNIQUE NOT NULL,
         one_month VARCHAR(50) NOT NULL,
@@ -118,7 +118,15 @@ def build_full():
         twenty_year VARCHAR(50) NOT NULL,
         thirty_year VARCHAR(50) NOT NULL);
     
-    CREATE TABLE constant_inflation_indexed (
+    CREATE TABLE maturities_inflation_indexed (
+        five_year VARCHAR(50) NOT NULL,
+        seven_year VARCHAR(50) NOT NULL,
+        ten_year VARCHAR(50) NOT NULL,
+        twenty_year VARCHAR(50) NOT NULL,
+        thirty_year VARCHAR(50) NOT NULL);
+    )
+    
+    CREATE TABLE inflation_indexed_long_term (
         id SERIAL PRIMARY KEY UNIQUE,
         date DATE UNIQUE NOT NULL,
         long_term_average VARCHAR(50) NOT NULL);

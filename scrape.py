@@ -8,6 +8,7 @@ import requests
 
 # function import
 from upload import upload_scrape, test_connection
+from db_insert import insert_scrape
 
 
 def table_constructor(data):
@@ -109,5 +110,7 @@ def scrape_data():
     table_df.to_csv("scrape/scrape.csv", index=False)
     print("scraped data in directory scrape")
 
-    if test_connection():
-        upload_scrape()
+    # if test_connection():
+    #     upload_scrape()
+
+    insert_scrape()
