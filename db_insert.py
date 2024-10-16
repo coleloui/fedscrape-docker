@@ -34,26 +34,13 @@ cursor = connection.cursor()
 def insert_scrape():
     """Takes scraped csv and inserts it into the scrape table."""
     # read csv and convert to df
-    data = pd.read_csv("./scrape/scrape.csv", index_col=False, header=0, delimiter=",")
+    data = pd.read_csv("./scrape/scrape.csv", index_col=0, header=0, delimiter=",")
     # takes df and writes it to a database table
     # if data exists replace
-    df = pd.to_datetime(data.date)
-    cursor.execute(
-        f"""
-        BEGIN;
-        CREATE TEMP TABLE tmp_table
-        (LIKE scrape INCLUDING DEFAULTS)
-        ON COMMIT DROP;
 
-        COPY tmp_table FROM {df};
+    existing = pd.read_sql("SELECT date FROM scrape;", con=conn)
 
-        INSERT INTO scrape
-        SELECT *
-        FROM tmp_table
-        ON CONFLICT DO NOTHING;
-        COMMIT;
-        """
-    )
+    print(existing["date"].to_numpy())
 
 
 def insert_download():
@@ -86,8 +73,10 @@ def insert_download():
                 data.to_sql("")
 
 
+insert_scrape()
+
 # close connections
-# cursor.close()
-# connection.close()
+cursor.close()
+connection.close()
 
 # insert_download()

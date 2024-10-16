@@ -2,13 +2,37 @@
 
 # package import
 import unicodedata
+import requests
+import datetime
 import pandas as pd
 from bs4 import BeautifulSoup
-import requests
 
 # function import
 from upload import upload_scrape, test_connection
 from db_insert import insert_scrape
+
+
+def month_to_number(month):
+    """Convert month to a number"""
+    m = {
+        "Jan": 1,
+        "Feb": 2,
+        "Mar": 3,
+        "Apr": 4,
+        "May": 5,
+        "Jun": 6,
+        "Jul": 7,
+        "Aug": 8,
+        "Sep": 9,
+        "Oct": 10,
+        "Nov": 11,
+        "Dec": 12,
+    }
+    try:
+        out = m[month]
+        return out
+    except:
+        raise ValueError("Not a month")
 
 
 def table_constructor(data):
@@ -70,8 +94,19 @@ def table_constructor(data):
                 if int((j - 1) / 2) == 0 or j % 2 == 0:
                     continue
                 else:
-                    # add the string to the row_data list
-                    row_data.append(text_string)
+                    if i == 0:
+                        year = text_string[0:4]
+                        month = text_string[4:7]
+                        month_num = month_to_number(month)
+                        if len(text_string[7:]) > 2:
+                            day = text_string[7:-1]
+                        else:
+                            day = text_string[7:]
+
+                        row_data.append(f"{year}-{month_num:02}-{day}")
+                    else:
+                        # add the string to the row_data list
+                        row_data.append(text_string)
             # if the row_data list is empty move to the next
             if len(row_data) == 0:
                 continue
@@ -113,4 +148,4 @@ def scrape_data():
     # if test_connection():
     #     upload_scrape()
 
-    insert_scrape()
+    # insert_scrape()
