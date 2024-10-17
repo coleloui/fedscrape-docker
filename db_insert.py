@@ -30,17 +30,37 @@ connection = psycopg2.connect(
 cursor = connection.cursor()
 
 
+def postgres_do_nothing(table, conn, keys, data_iter):
+    from sqlalchemy.dialects.postgresql import insert
+
+    data = [dict(zip(keys, row)) for row in data_iter]
+
+    insert_statement = insert(table.table).values(data)
+    upsert_statement = insert_statement.on_conflict_do_nothing()
+    conn.execute(upsert_statement)
+
+
 # insert scrap data into the scrap table
 def insert_scrape():
     """Takes scraped csv and inserts it into the scrape table."""
     # read csv and convert to df
-    data = pd.read_csv("./scrape/scrape.csv", index_col=0, header=0, delimiter=",")
+    data = pd.read_csv("./scrape/scrape.csv", index_col=False, header=0, delimiter=",")
     # takes df and writes it to a database table
     # if data exists replace
+    data.to_sql(
+        name="scrape",
+        con=conn,
+        if_exists="append",
+        index=False,
+        method=postgres_do_nothing,
+    )
+    # existing = pd.read_sql("SELECT * FROM scrape;", con=conn)
 
-    existing = pd.read_sql("SELECT date FROM scrape;", con=conn)
+    # merged = pd.concat([data, existing], ignore_index=True)
 
-    print(existing["date"].to_numpy())
+    # remove_existing = merged.drop_duplicates()
+
+    # print(remove_existing)
 
 
 def insert_download():

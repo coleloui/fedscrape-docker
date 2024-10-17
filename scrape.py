@@ -9,24 +9,25 @@ from bs4 import BeautifulSoup
 
 # function import
 from upload import upload_scrape, test_connection
-from db_insert import insert_scrape
+
+# from db_insert import insert_scrape
 
 
 def month_to_number(month):
     """Convert month to a number"""
     m = {
-        "Jan": 1,
-        "Feb": 2,
-        "Mar": 3,
-        "Apr": 4,
-        "May": 5,
-        "Jun": 6,
-        "Jul": 7,
-        "Aug": 8,
-        "Sep": 9,
-        "Oct": 10,
-        "Nov": 11,
-        "Dec": 12,
+        "Jan": "01",
+        "Feb": "02",
+        "Mar": "03",
+        "Apr": "04",
+        "May": "05",
+        "Jun": "06",
+        "Jul": "07",
+        "Aug": "08",
+        "Sep": "09",
+        "Oct": "10",
+        "Nov": "11",
+        "Dec": "12",
     }
     try:
         out = m[month]
@@ -103,10 +104,13 @@ def table_constructor(data):
                         else:
                             day = text_string[7:]
 
-                        row_data.append(f"{year}-{month_num:02}-{day}")
+                        row_data.append(f"{year}-{month_num}-{day}")
                     else:
                         # add the string to the row_data list
-                        row_data.append(text_string)
+                        if not text_string:
+                            row_data.append("n.a.")
+                        else:
+                            row_data.append(text_string)
             # if the row_data list is empty move to the next
             if len(row_data) == 0:
                 continue
