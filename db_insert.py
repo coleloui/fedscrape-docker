@@ -31,6 +31,7 @@ cursor = connection.cursor()
 
 
 def postgres_do_nothing(table, conn, keys, data_iter):
+    """If data exists skip"""
     from sqlalchemy.dialects.postgresql import insert
 
     data = [dict(zip(keys, row)) for row in data_iter]
@@ -46,7 +47,6 @@ def insert_scrape():
     # read csv and convert to df
     data = pd.read_csv("./scrape/scrape.csv", index_col=False, header=0, delimiter=",")
     # takes df and writes it to a database table
-    # if data exists replace
     data.to_sql(
         name="scrape",
         con=conn,
@@ -54,18 +54,13 @@ def insert_scrape():
         index=False,
         method=postgres_do_nothing,
     )
-    # existing = pd.read_sql("SELECT * FROM scrape;", con=conn)
-
-    # merged = pd.concat([data, existing], ignore_index=True)
-
-    # remove_existing = merged.drop_duplicates()
-
-    # print(remove_existing)
 
 
 def insert_download():
     """Takes downloaded data and inserts it into the specific tables"""
+    # file path for download
     root = "./download"
+    # dictionary to match directory to table name
     file_table = {
         "fed_eff": "federal_funs",
         "comm_non_fin": "commercial_paper_nonfinancial",
@@ -78,19 +73,28 @@ def insert_download():
         "inflation_long_term": "inflation_indexed_long_term",
     }
 
+    # walk the path to get the directory and files
     for subdir, dirs, files in os.walk(root):
         for file in files:
+            # skip the placeholder file
             if file == ".gitkeep":
                 continue
             else:
+                # read csv's
                 data = pd.read_csv(
                     f"./{root}/{subdir}/{file}",
                     index_col=False,
                     header=6,
                     delimiter=",",
                 )
-
-                data.to_sql("")
+                # upload csv
+                data.to_sql(
+                    name=file_table[subdir],
+                    con=conn,
+                    if_exists="append",
+                    index=False,
+                    method=postgres_do_nothing,
+                )
 
 
 insert_scrape()
