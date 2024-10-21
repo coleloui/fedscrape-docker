@@ -60,18 +60,6 @@ def insert_download():
     """Takes downloaded data and inserts it into the specific tables"""
     # file path for download
     root = "./download"
-    # dictionary to match directory to table name
-    file_table = {
-        "fed_eff": "federal_funs",
-        "comm_non_fin": "commercial_paper_nonfinancial",
-        "comm_fin": "commercial_paper_financial",
-        "bank_prime": "bank_prime_loan",
-        "discount_window": "discount_window_primary_credit",
-        "tresury_bills": "us_gov_securities_tresury_bills",
-        "nominal_9": "maturties_nominal_9",
-        "inflation_indexed": "maturities_inflation_indexed",
-        "inflation_long_term": "inflation_indexed_long_term",
-    }
 
     # walk the path to get the directory and files
     for subdir, dirs, files in os.walk(root):
@@ -89,7 +77,7 @@ def insert_download():
                 )
                 # upload csv
                 data.to_sql(
-                    name=file_table[subdir],
+                    name=subdir,
                     con=conn,
                     if_exists="append",
                     index=False,
