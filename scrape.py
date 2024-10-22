@@ -149,7 +149,11 @@ def scrape_data():
     table_df.to_csv("scrape/scrape.csv", index=False)
     print("scraped data in directory scrape")
 
-    # if test_connection():
-    #     upload_scrape()
+    # check_connection = test_connection()
+
+    # if check_connection == True:
+    #     upload_download()
+    # else:
+    #     return
 
     insert_scrape()

@@ -91,7 +91,7 @@ def build_full():
         rate VARCHAR(50) NOT NULL);
  
     CREATE TABLE discount_window_primary_credit (
-        did SERIAL PRIMARY KEY UNIQUE,
+        id SERIAL PRIMARY KEY UNIQUE,
         date DATE UNIQUE NOT NULL,
         rate VARCHAR(50) NOT NULL);
     
@@ -119,6 +119,8 @@ def build_full():
         thirty_year VARCHAR(50) NOT NULL);
     
     CREATE TABLE maturities_inflation_indexed (
+        id SERIAL PRIMARY KEY UNIQUE,
+        date DATE UNIQUE NOT NULL,
         five_year VARCHAR(50) NOT NULL,
         seven_year VARCHAR(50) NOT NULL,
         ten_year VARCHAR(50) NOT NULL,

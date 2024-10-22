@@ -5,12 +5,13 @@ from concurrent.futures import ThreadPoolExecutor
 import requests
 
 # function import
-from upload import upload_download, test_connection
+# from upload import upload_download, test_connection
+# from db_insert import insert_download
 
 # Base URL that gets formatted for the respective and rate and date
 BASE_URL = (
     "https://www.federalreserve.gov/datadownload/Output.aspx?rel=H15&series={series}"
-    "&lastobs=&from=01/01/2000&to={current_date}&filetype=csv&label=include&layout=seriescolumn"
+    "&lastobs=&from=01/01/2000&to={current_date}&filetype=csv&label=omit&layout=seriescolumn"
 )
 
 # URLS to iterate through when retreiving data. This is a dictionary because it allows
@@ -58,6 +59,7 @@ def download_file(data):
 
         with open(f"./download/{title}/{title}.csv", mode="wb") as file:
             file.write(response.content)
+            print(response.content)
         print(f"Downloaded file {title}")
 
         response.raise_for_status()
@@ -83,7 +85,14 @@ def bulk_download():
     with ThreadPoolExecutor() as executor:
         executor.map(download_file, URLS.items())
 
-    if test_connection() == True:
-        upload_download()
-    else:
-        return
+    # check_connection = test_connection()
+
+    # if check_connection == True:
+    #     upload_download()
+    # else:
+    #     return
+
+    # insert_download()
+
+
+bulk_download()

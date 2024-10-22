@@ -71,6 +71,7 @@ To connect to AWS and your S3 bucket, you will need to go into the .env that you
 ```
 AWS_KEY=
 AWS_SECRET=
+AWS_REGION=
 S3_BUCKET=
 ```
 

@@ -29,6 +29,45 @@ connection = psycopg2.connect(
 # create a curosor for queries
 cursor = connection.cursor()
 
+dataframe_table_columns = {
+    "federal_eff_funds": ["date", "rate"],
+    "commercial_paper_nonfinancial": ["date", "one_month", "two_month", "three_month"],
+    "commercial_paper_financial": ["date", "one_month", "two_month", "three_month"],
+    "bank_prime_loan": ["date", "rate"],
+    "discount_window_primary_credit": ["date", "rate"],
+    "us_gov_securities_tresury_bills": [
+        "date",
+        "four_week",
+        "three_month",
+        "six_month",
+        "one_year",
+    ],
+    "maturities_nominal_9": [
+        "date",
+        "one_month",
+        "two_month",
+        "three_month",
+        "six_month",
+        "one_year",
+        "two_year",
+        "three_year",
+        "five_year",
+        "seven_year",
+        "ten_year",
+        "twenty_year",
+        "thirty_year",
+    ],
+    "maturities_inflation_indexed": [
+        "date",
+        "five_year",
+        "seven_year",
+        "ten_year",
+        "twenty_year",
+        "thirty_year",
+    ],
+    "us_gov_securities_tresury_bills": ["date", "one_month", "long_term_average"],
+}
+
 
 def postgres_do_nothing(table, conn, keys, data_iter):
     """If data exists skip"""
@@ -59,30 +98,40 @@ def insert_scrape():
 def insert_download():
     """Takes downloaded data and inserts it into the specific tables"""
     # file path for download
-    root = "./download"
+    root = "download"
 
     # walk the path to get the directory and files
     for subdir, dirs, files in os.walk(root):
         for file in files:
+
             # skip the placeholder file
             if file == ".gitkeep":
                 continue
             else:
                 # read csv's
                 data = pd.read_csv(
-                    f"./{root}/{subdir}/{file}",
+                    f"./{subdir}/{file}",
                     index_col=False,
-                    header=6,
+                    header=1,
                     delimiter=",",
                 )
-                # upload csv
-                data.to_sql(
-                    name=subdir,
-                    con=conn,
-                    if_exists="append",
-                    index=False,
-                    method=postgres_do_nothing,
-                )
+
+                # format dataframe to have matching columns to table columns
+                # data_formated = data.set_axis(
+                #     dataframe_table_columns[directory], axis=1
+                # )
+                # print(data_formated)
+
+                print(subdir.split("/")[-1])
+
+                # # upload csv
+                # data.to_sql(
+                #     name=directory,
+                #     con=conn,
+                #     if_exists="append",
+                #     index=False,
+                #     method=postgres_do_nothing,
+                # ),
 
 
 insert_download()

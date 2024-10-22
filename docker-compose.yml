@@ -9,6 +9,7 @@ services:
     environment:
       AWS_KEY: ""
       AWS_SECRET: ""
+      AWS_REGION: ""
       S3_BUCKET: ""
       DB_USER: "postgres"
       DB_PASSWORD: "test"
