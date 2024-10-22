@@ -85,10 +85,8 @@ def insert_download():
                 )
 
 
-insert_scrape()
+insert_download()
 
 # close connections
 cursor.close()
 connection.close()
-
-# insert_download()

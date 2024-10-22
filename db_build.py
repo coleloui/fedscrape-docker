@@ -66,10 +66,10 @@ def build_full():
 
     cursor.execute(
         """
-    # CREATE TABLE federal_funds (
-    #     id SERIAL PRIMARY KEY UNIQUE,
-    #     date DATE UNIQUE NOT NULL,
-    #     rate VARCHAR(50) NOT NULL);
+    CREATE TABLE federal_eff_funds (
+        id SERIAL PRIMARY KEY UNIQUE,
+        date DATE UNIQUE NOT NULL,
+        rate VARCHAR(50) NOT NULL);
 
     CREATE TABLE commercial_paper_nonfinancial (
         id SERIAL PRIMARY KEY UNIQUE,
@@ -124,7 +124,6 @@ def build_full():
         ten_year VARCHAR(50) NOT NULL,
         twenty_year VARCHAR(50) NOT NULL,
         thirty_year VARCHAR(50) NOT NULL);
-    )
     
     CREATE TABLE inflation_indexed_long_term (
         id SERIAL PRIMARY KEY UNIQUE,
@@ -134,7 +133,7 @@ def build_full():
     )
 
 
-build_scrape()
+build_full()
 connection.commit()
 cursor.close()
 connection.close()

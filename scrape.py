@@ -8,9 +8,9 @@ import pandas as pd
 from bs4 import BeautifulSoup
 
 # function import
-from upload import upload_scrape, test_connection
+# from upload import upload_scrape, test_connection
 
-# from db_insert import insert_scrape
+from db_insert import insert_scrape
 
 
 def month_to_number(month):
@@ -152,4 +152,4 @@ def scrape_data():
     # if test_connection():
     #     upload_scrape()
 
-    # insert_scrape()
+    insert_scrape()
