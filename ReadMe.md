@@ -2,37 +2,15 @@
 
 This application is currently a work in progress. The intention is to keep updated records of the Federal Interest Rates so that they may be easily referenced. Eventually the plan is to be able to view this data either in specific days or over periods of time as an average.
 
-This application is built with the intention of uploading to an S3 bucket and then loading that data into Snowflake using Snowpipe. I have attached Snowflake queries in the .sql files. You do not need to connect to either of these, but the guide is in the [Setup](#setup) section.
+This application is built with the intention of uploading to an S3 bucket and then loading that data into Snowflake using Snowpipe. I have attached Snowflake queries in the .sql files. You do not need to connect to either of these, but the guide is in the [Setup](#setup) section. Once the application is setup you have multiple options from the [Commands](#commands) section.
 
-To get started right away please view the [Quickstart](#Quickstart) section below
-
-## Quickstart
-
-### <ins>Enter the following commands in your terminal to set up the application from the root of the application</ins>
-
-Create and enter virtual environment
-
-```
-$ virtualenv -p python3 .venv && source .venv/bin/activate
-```
-
-Install packages
-
-```
-$ pip3 install -r requirements.txt
-```
-
-Create necessary files
-
-```
-$ touch .env && printf "AWS_KEY=\nAWS_SECRET=\nS3_BUCKET=" >> .env
-```
+## Setup
 
 ### As a Docker Container
 
 FOR LOUIS - Move this to docker registry, so users can just pull image (like we pull centos or python), instead of build it locally
 
-To build a standalone container
+### To build a standalone container
 
 ```
 docker build . -t fedscrape-docker:localhost
@@ -46,24 +24,7 @@ docker container ls
 docker exec -it <CONTAINER_ID> /bin/bash
 ```
 
-From here a user can execute the script as they would like
-
-```
-python app.py --all
-python app.py --scrape
-python app.py --download
-```
-
-### As a docker compose with DB
-
-Simply execute the compose to create DB container with python container
-
-```
-docker-compose up -d --build
-```
-
-## Setup
-
+### Cloud Storage with standalone
 ### <ins>AWS S3</ins>
 
 To connect to AWS and your S3 bucket, you will need to go into the .env that you created from the quickstart and fill out your credentials.
@@ -95,4 +56,23 @@ Query to describe your integration to obtain the STORAGE_AWS_EXTERNAL_ID from th
 
 ```
 DESC integration <title>;
+```
+
+### As a docker compose with DB
+
+Simply execute the compose to create DB container with python container
+
+```
+docker-compose up -d --build
+```
+
+
+
+## Commands
+From here a user can execute the script as they would like
+
+```
+python app.py --all
+python app.py --scrape
+python app.py --download
 ```
