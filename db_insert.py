@@ -116,22 +116,22 @@ def insert_download():
                     delimiter=",",
                 )
 
-                # format dataframe to have matching columns to table columns
-                # data_formated = data.set_axis(
-                #     dataframe_table_columns[directory], axis=1
-                # )
-                # print(data_formated)
+                format dataframe to have matching columns to table columns
+                data_formated = data.set_axis(
+                    dataframe_table_columns[directory], axis=1
+                )
+                print(data_formated)
 
                 print(subdir.split("/")[-1])
 
-                # # upload csv
-                # data.to_sql(
-                #     name=directory,
-                #     con=conn,
-                #     if_exists="append",
-                #     index=False,
-                #     method=postgres_do_nothing,
-                # ),
+                # upload csv
+                data.to_sql(
+                    name=directory,
+                    con=conn,
+                    if_exists="append",
+                    index=False,
+                    method=postgres_do_nothing,
+                ),
 
 
 insert_download()
