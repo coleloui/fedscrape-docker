@@ -5,8 +5,8 @@ from concurrent.futures import ThreadPoolExecutor
 import requests
 
 # function import
-# from upload import upload_download, test_connection
-# from db_insert import insert_download
+from upload import test_snowflake_connection, upload_download
+from db_insert import test_postgres_connection, insert_download
 
 # Base URL that gets formatted for the respective and rate and date
 BASE_URL = (
@@ -85,14 +85,15 @@ def bulk_download():
     with ThreadPoolExecutor() as executor:
         executor.map(download_file, URLS.items())
 
-    # check_connection = test_connection()
+    check_snowflake_connection = test_snowflake_connection()
+    check_postgres_connection = test_postgres_connection()
 
-    # if check_connection == True:
-    #     upload_download()
-    # else:
-    #     return
-
-    # insert_download()
+    if check_snowflake_connection == True:
+        upload_download()
+    elif check_postgres_connection == True:
+        insert_download()
+    else:
+        return
 
 
 bulk_download()

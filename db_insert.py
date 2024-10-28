@@ -45,7 +45,6 @@ dataframe_table_columns = {
     "maturities_nominal_9": [
         "date",
         "one_month",
-        "two_month",
         "three_month",
         "six_month",
         "one_year",
@@ -65,8 +64,28 @@ dataframe_table_columns = {
         "twenty_year",
         "thirty_year",
     ],
-    "us_gov_securities_tresury_bills": ["date", "one_month", "long_term_average"],
+    "inflation_indexed_long_term": ["date", "long_term_average"],
 }
+
+
+def test_postgres_connection():
+    from sqlalchemy import create_engine, exc
+    from sqlalchemy.orm import sessionmaker
+
+    engine = create_engine(connection_string)
+    Session = sessionmaker(bind=engine)
+
+    try:
+        session = Session()
+        # Perform database operations here
+        if session:
+            return True
+
+    except exc.OperationalError as e:
+        return False
+
+    finally:
+        session.close()
 
 
 def postgres_do_nothing(table, conn, keys, data_iter):
@@ -116,25 +135,22 @@ def insert_download():
                     delimiter=",",
                 )
 
-                format dataframe to have matching columns to table columns
+                directory = subdir.split("/")[-1]
+
+                # format dataframe to have matching columns to table columns
                 data_formated = data.set_axis(
                     dataframe_table_columns[directory], axis=1
                 )
-                print(data_formated)
 
-                print(subdir.split("/")[-1])
-
-                # upload csv
-                data.to_sql(
+                # upload to postgres db
+                data_formated.to_sql(
                     name=directory,
                     con=conn,
                     if_exists="append",
                     index=False,
                     method=postgres_do_nothing,
-                ),
+                )
 
-
-insert_download()
 
 # close connections
 cursor.close()
