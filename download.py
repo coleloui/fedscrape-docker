@@ -19,32 +19,32 @@ BASE_URL = (
 URLS = {
     # Federal funds effective rate
     "federal_eff_funds": BASE_URL.format(
-        series="c5025f4bbbed155a6f17c587772ed69e", current_date="07/17/2024"
+        series="c5025f4bbbed155a6f17c587772ed69e", current_date="08/28/2024"
     ),
     # Federal funds Nonfinancial Commercial Paper Interest rate
     "commercial_paper_nonfinancial": BASE_URL.format(
-        series="ca2dd1ccd5102a49176c86b6646496c3", current_date="07/17/2024"
+        series="ca2dd1ccd5102a49176c86b6646496c3", current_date="08/28/2024"
     ),
     "commercial_paper_financial": BASE_URL.format(
-        series="268dcdcf1b746c42fb990fe2107b7dad", current_date="07/17/2024"
+        series="268dcdcf1b746c42fb990fe2107b7dad", current_date="08/28/2024"
     ),
     "bank_prime_loan": BASE_URL.format(
-        series="02338be6957591cdba0a59c6f09b8389", current_date="07/17/2024"
+        series="02338be6957591cdba0a59c6f09b8389", current_date="08/28/2024"
     ),
     "discount_window_primary_credit": BASE_URL.format(
-        series="e048853c9a3f0734b8538f508828f298", current_date="07/17/2024"
+        series="e048853c9a3f0734b8538f508828f298", current_date="08/28/2024"
     ),
     "us_gov_securities_tresury_bills": BASE_URL.format(
-        series="4ab494d223ec49ec01fe09b49c6d17da", current_date="07/17/2024"
+        series="4ab494d223ec49ec01fe09b49c6d17da", current_date="08/28/2024"
     ),
     "maturities_nominal_9": BASE_URL.format(
-        series="bf17364827e38702b42a58cf8eaa3f78", current_date="07/17/2024"
+        series="bf17364827e38702b42a58cf8eaa3f78", current_date="08/28/2024"
     ),
     "maturities_inflation_indexed": BASE_URL.format(
-        series="a5efc8cebeae2f178010054da08cb1f1", current_date="07/17/2024"
+        series="a5efc8cebeae2f178010054da08cb1f1", current_date="08/28/2024"
     ),
     "inflation_indexed_long_term": BASE_URL.format(
-        series="68447ee78d1e78718e4a96db9405d605", current_date="07/17/2024"
+        series="68447ee78d1e78718e4a96db9405d605", current_date="08/28/2024"
     ),
 }
 
@@ -59,8 +59,7 @@ def download_file(data):
 
         with open(f"./download/{title}/{title}.csv", mode="wb") as file:
             file.write(response.content)
-            print(response.content)
-        print(f"Downloaded file {title}")
+        print(f"Data downloaded to directory {title}")
 
         response.raise_for_status()
 
@@ -94,6 +93,3 @@ def bulk_download():
         insert_download()
     else:
         return
-
-
-bulk_download()
