@@ -5,7 +5,7 @@ import argparse
 
 # function import
 from scrape import scrape_data
-from request_data import bulk_download
+from download import bulk_download
 
 # python package
 parser = argparse.ArgumentParser()

@@ -25,9 +25,12 @@ aws_session = session.Session(
 s3 = aws_session.resource("s3")
 
 
-def test_connection():
+def test_snowflake_connection():
     """This function tests our S3 connection.
     If it exists it will allow users to save files to their S3"""
+    if aws_key or aws_region or aws_session or aws_secret == "":
+        return False
+
     try:
         s3.meta.client.head_bucket(Bucket=s3bucket)
         return True
