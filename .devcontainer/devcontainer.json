@@ -45,7 +45,8 @@
 				// "ms-python.pylint",
 				"ms-python.python",
 				// "ms-python.debugpy",
-				"mechatroner.rainbow-csv"
+				"mechatroner.rainbow-csv",
+				"snowflake.snowflake-vsc"
 			]
 		}
 	},
