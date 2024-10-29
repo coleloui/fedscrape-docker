@@ -8,9 +8,8 @@ import pandas as pd
 from bs4 import BeautifulSoup
 
 # function import
-# from upload import upload_scrape, test_connection
-
-from db_insert import insert_scrape
+from upload import upload_scrape, test_snowflake_connection
+from db_insert import insert_scrape, test_postgres_connection
 
 
 def month_to_number(month):
@@ -147,13 +146,14 @@ def scrape_data():
     table_df = table_constructor(table_data)
     # conver DataFrame to CSV
     table_df.to_csv("scrape/scrape.csv", index=False)
-    print("scraped data in directory scrape")
+    print("Data downloaded to directory scrape")
 
-    # check_connection = test_connection()
+    check_snowflake_connection = test_snowflake_connection()
+    check_postgres_connection = test_postgres_connection()
 
-    # if check_connection == True:
-    #     upload_download()
-    # else:
-    #     return
-
-    insert_scrape()
+    if check_snowflake_connection == True:
+        upload_scrape()
+    elif check_postgres_connection == True:
+        insert_scrape()
+    else:
+        return

@@ -24,6 +24,14 @@ docker container ls
 docker exec -it <CONTAINER_ID> /bin/bash
 ```
 
+### As a docker compose with DB
+
+Simply execute the compose to create DB container with python container
+
+```
+docker-compose up -d --build
+```
+
 ### Cloud Storage with standalone
 ### <ins>AWS S3</ins>
 
@@ -58,20 +66,13 @@ Query to describe your integration to obtain the STORAGE_AWS_EXTERNAL_ID from th
 DESC integration <title>;
 ```
 
-### As a docker compose with DB
-
-Simply execute the compose to create DB container with python container
-
-```
-docker-compose up -d --build
-```
-
 
 
 ## Commands
 From here a user can execute the script as they would like
 
 ```
+python app.py --tables
 python app.py --all
 python app.py --scrape
 python app.py --download

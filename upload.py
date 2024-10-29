@@ -16,39 +16,49 @@ aws_secret = os.getenv("AWS_SECRET")
 aws_region = os.getenv("AWS_REGION")
 s3bucket = os.getenv("S3_BUCKET")
 
-# aws connection
-aws_session = session.Session(
-    region_name=aws_region,
-    aws_access_key_id=aws_key,
-    aws_secret_access_key=aws_secret,
-)
-s3 = aws_session.resource("s3")
+
+def create_aws_session():
+    """creates an aws session"""
+    # aws connection
+    aws_session = session.Session(
+        region_name=aws_region,
+        aws_access_key_id=aws_key,
+        aws_secret_access_key=aws_secret,
+    )
+
+    return aws_session.resource("s3")
 
 
 def test_snowflake_connection():
     """This function tests our S3 connection.
     If it exists it will allow users to save files to their S3"""
-    if aws_key or aws_region or aws_session or aws_secret == "":
+    if aws_key == "":
         return False
-
-    try:
-        s3.meta.client.head_bucket(Bucket=s3bucket)
-        return True
-    except botocore.exceptions.ClientError as e:
-        error_code = int(e.response["Error"]["Code"])
-        if error_code == 403:
-            print("Forbidden Access")
-            return False
-        elif error_code == 404:
-            print("Bucket Doenst Exist")
-            return False
-        else:
-            print("No Connection")
-            return False
+    elif aws_region == "":
+        return False
+    elif aws_secret == "":
+        return False
+    else:
+        try:
+            s3 = create_aws_session()
+            s3.meta.client.head_bucket(Bucket=s3bucket)
+            return True
+        except botocore.exceptions.ClientError as e:
+            error_code = int(e.response["Error"]["Code"])
+            if error_code == 403:
+                print("Forbidden Access")
+                return False
+            elif error_code == 404:
+                print("Bucket Doenst Exist")
+                return False
+            else:
+                print("No Connection")
+                return False
 
 
 def upload_download():
     """upload the download directory and all included directories"""
+    s3 = create_aws_session()
     for root, dirs, files in os.walk("download"):
         for file in files:
             if file == ".gitkeep":
@@ -63,6 +73,7 @@ def upload_download():
 
 def upload_scrape():
     """upload scraped csv"""
+    s3 = create_aws_session()
     # call funtion to send the CSV to S3 bucket
     s3.Object(s3bucket, "data/scrape/scrape.csv").put(
         Body=open("scrape/scrape.csv", "rb")

@@ -4,7 +4,6 @@
 import os
 
 # package import
-import psycopg2
 import pandas as pd
 
 from sqlalchemy import create_engine
@@ -16,18 +15,8 @@ load_dotenv()
 db_user = os.getenv("DB_USER")
 db_password = os.getenv("DB_PASSWORD")
 db_port = os.getenv("DB_PORT")
-
-# connect to postgres using sqlalchemy
 connection_string = f"postgresql://{db_user}:{db_password}@database:{db_port}/{db_user}"
-db = create_engine(connection_string)
-conn = db.connect()
 
-# connect to postgres using psycopg2
-connection = psycopg2.connect(
-    f"dbname=postgres user={db_user} host=database password={db_password} port={db_port}"
-)
-# create a curosor for queries
-cursor = connection.cursor()
 
 dataframe_table_columns = {
     "federal_eff_funds": ["date", "rate"],
@@ -68,6 +57,12 @@ dataframe_table_columns = {
 }
 
 
+def create_connection():
+    # connect to postgres using sqlalchemy
+    db = create_engine(connection_string)
+    return db.connect()
+
+
 def test_postgres_connection():
     from sqlalchemy import create_engine, exc
     from sqlalchemy.orm import sessionmaker
@@ -102,6 +97,8 @@ def postgres_do_nothing(table, conn, keys, data_iter):
 # insert scrap data into the scrap table
 def insert_scrape():
     """Takes scraped csv and inserts it into the scrape table."""
+    # database connection
+    conn = create_connection()
     # read csv and convert to df
     data = pd.read_csv("./scrape/scrape.csv", index_col=False, header=0, delimiter=",")
     # takes df and writes it to a database table
@@ -116,11 +113,11 @@ def insert_scrape():
 
 def insert_download():
     """Takes downloaded data and inserts it into the specific tables"""
-    # file path for download
-    root = "download"
+    # database connection
+    conn = create_connection()
 
     # walk the path to get the directory and files
-    for subdir, dirs, files in os.walk(root):
+    for subdir, dirs, files in os.walk("download"):
         for file in files:
 
             # skip the placeholder file
@@ -136,7 +133,7 @@ def insert_download():
                 )
 
                 directory = subdir.split("/")[-1]
-
+                print(directory)
                 # format dataframe to have matching columns to table columns
                 data_formated = data.set_axis(
                     dataframe_table_columns[directory], axis=1
@@ -150,8 +147,3 @@ def insert_download():
                     index=False,
                     method=postgres_do_nothing,
                 )
-
-
-# close connections
-cursor.close()
-connection.close()
