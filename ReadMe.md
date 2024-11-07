@@ -8,8 +8,6 @@ This application is built with the intention of uploading to an S3 bucket and th
 
 ### As a Docker Container
 
-FOR LOUIS - Move this to docker registry, so users can just pull image (like we pull centos or python), instead of build it locally
-
 ### To build a standalone container
 
 ```
@@ -26,8 +24,22 @@ docker exec -it <CONTAINER_ID> /bin/bash
 
 ### As a docker compose with DB
 
-Simply execute the compose to create DB container with python container
+Simply execute the compose to create DB container with python container. There is local dummy information in the docker-compose.yml that can be changed for your own postgresql if you have one set up. You will need to change the following keys.
 
+Under python_app -> environment
+```
+DB_USER:
+DB_PASSWORD:
+DB_PORT:
+```
+Under database -> environment
+```
+POSTGRES_USER:
+POSTGRES_PASSWORD:
+POSTGRES_DB:
+```
+
+After run
 ```
 docker-compose up -d --build
 ```
@@ -35,8 +47,8 @@ docker-compose up -d --build
 ### Cloud Storage with standalone
 ### <ins>AWS S3</ins>
 
-To connect to AWS and your S3 bucket, you will need to go into the .env that you created from the quickstart and fill out your credentials.
-
+To connect to AWS and your S3 bucket, you will need to edit the docker-compose.yml to include these keys with their respective values.
+Under python_app -> environment
 ```
 AWS_KEY=
 AWS_SECRET=
