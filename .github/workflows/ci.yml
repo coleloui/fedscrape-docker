@@ -48,12 +48,3 @@ jobs:
           ADMIN_API_KEY: test-admin-key
           SECRET_KEY: test-secret
         run: pytest tests/ -v --tb=short
-
-  deploy:
-    needs: test
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    steps:
-      - name: Trigger Railway deploy
-        run: |
-          curl -X POST "${{ secrets.RAILWAY_DEPLOY_WEBHOOK }}"
