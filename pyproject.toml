@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "fedscrape"
 version = "1.0.0"
 description = "Federal Reserve H.15 interest rate data API and MCP server"
-requires-python = ">=3.14"
+requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.115.0",
     "uvicorn[standard]>=0.30.6",
