@@ -7,15 +7,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy dependency manifests first for layer caching
-COPY pyproject.toml requirements.txt ./
-
-# Install the package in editable mode (exposes the `fedscrape` CLI)
-RUN pip install --no-cache-dir -e ".[dev]"
+COPY pyproject.toml .
+RUN pip install --no-cache-dir .
 
 COPY . .
-
-RUN mkdir -p scrape download
 
 EXPOSE 8000
 
