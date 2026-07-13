@@ -2,9 +2,11 @@
 
 import logging
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from api.cache import cache_delete_pattern, cache_get, cache_set
+from api.limiter import limiter
 from api.models.rate import (
     RateResponse,
     RateSeriesEntry,
@@ -22,16 +24,26 @@ logger = logging.getLogger(__name__)
 
 
 @router.get("/latest", response_model=RateResponse)
-async def latest_rates(session: AsyncSession = Depends(get_session)):
+@limiter.limit("60/minute")
+async def latest_rates(request: Request, session: AsyncSession = Depends(get_session)):
     """Return the most recent H.15 rate record."""
+    cached = await cache_get("rates:latest")
+    if cached is not None:
+        return cached
+
     record = await get_latest(session)
     if record is None:
         raise HTTPException(status_code=404, detail="No rate data in database.")
-    return record
+
+    result = RateResponse.model_validate(record).model_dump(mode="json")
+    await cache_set("rates:latest", result)
+    return result
 
 
 @router.get("/spread", response_model=SpreadResponse)
+@limiter.limit("60/minute")
 async def yield_spread(
+    request: Request,
     rate_a: str = Query(..., description="First rate-type slug"),
     rate_b: str = Query(..., description="Second rate-type slug"),
     session: AsyncSession = Depends(get_session),
@@ -40,6 +52,11 @@ async def yield_spread(
     for slug in (rate_a, rate_b):
         if slug not in RATE_TYPES:
             raise HTTPException(status_code=404, detail=f"Unknown rate type: {slug!r}")
+
+    cache_key = f"rates:spread:{rate_a}:{rate_b}"
+    cached = await cache_get(cache_key)
+    if cached is not None:
+        return cached
 
     record = await get_latest(session)
     if record is None:
@@ -55,11 +72,14 @@ async def yield_spread(
             detail="Cannot compute spread — one or both rates are unavailable (n.a.).",
         )
 
-    return SpreadResponse(date=record.date, rate_a=rate_a, rate_b=rate_b, spread=spread)
+    result = SpreadResponse(date=record.date, rate_a=rate_a, rate_b=rate_b, spread=spread)
+    await cache_set(cache_key, result.model_dump(mode="json"))
+    return result
 
 
 @router.post("/refresh", response_model=RefreshResponse)
-async def refresh_rates(session: AsyncSession = Depends(get_session)):
+@limiter.limit("5/minute")
+async def refresh_rates(request: Request, session: AsyncSession = Depends(get_session)):
     """Scrape the latest Fed H.15 data and upsert into the database."""
     try:
         records = scrape_latest()
@@ -68,11 +88,14 @@ async def refresh_rates(session: AsyncSession = Depends(get_session)):
         raise HTTPException(status_code=502, detail=f"Scrape failed: {exc}")
 
     count = await upsert_records(session, records)
+    await cache_delete_pattern("rates:*")
     return RefreshResponse(upserted=count)
 
 
 @router.get("/{rate_type}", response_model=RateSeriesResponse)
+@limiter.limit("60/minute")
 async def rate_series(
+    request: Request,
     rate_type: str,
     limit: int = Query(30, ge=1, le=365, description="Number of recent records to return"),
     session: AsyncSession = Depends(get_session),
@@ -81,8 +104,16 @@ async def rate_series(
     if rate_type not in RATE_TYPES:
         raise HTTPException(status_code=404, detail=f"Unknown rate type: {rate_type!r}")
 
+    cache_key = f"rates:series:{rate_type}:{limit}"
+    cached = await cache_get(cache_key)
+    if cached is not None:
+        return cached
+
     rows = await get_series(session, rate_type, limit)
-    return RateSeriesResponse(
+    result = RateSeriesResponse(
         rate_type=rate_type,
         data=[RateSeriesEntry(date=r["date"], value=r["value"]) for r in rows],
     )
+    data = result.model_dump(mode="json")
+    await cache_set(cache_key, data)
+    return data

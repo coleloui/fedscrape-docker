@@ -19,5 +19,5 @@ RUN mkdir -p scrape download
 
 EXPOSE 8000
 
-# Default entrypoint — individual services override this in docker-compose.yml
-CMD ["fedscrape", "serve", "--host", "0.0.0.0"]
+# Railway injects $PORT; fall back to 8000 for local/Docker Compose use
+CMD uvicorn api.main:app --host 0.0.0.0 --port ${PORT:-8000}

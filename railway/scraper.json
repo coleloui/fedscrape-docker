@@ -1,0 +1,4 @@
+{
+  "startCommand": "fedscrape scrape",
+  "cronSchedule": "0 18 * * 1-5"
+}
