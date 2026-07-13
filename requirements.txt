@@ -1,9 +1,1 @@
-beautifulsoup4
-boto3
-html5lib
-lxml
-pandas
-psycopg2-binary
-python-dotenv
-requests
-sqlalchemy
+-e .

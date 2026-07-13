@@ -1,28 +1,75 @@
 services:
-  python_app:
-    command: tail -F /dev/null
-    depends_on:
-      - database
-    build:
-      context: ./
-      dockerfile: Dockerfile
+
+  db:
+    image: postgres:16
     environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: fedscrape serve --host 0.0.0.0
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/postgres
+      API_PORT: "8000"
+      API_BASE_URL: http://api:8000
       AWS_KEY: ""
       AWS_SECRET: ""
       AWS_REGION: ""
       S3_BUCKET: ""
-      DB_USER: "postgres"
-      DB_PASSWORD: "test"
-      DB_PORT: '5432'
-  database:
-    image: docker.io/library/postgres:14
-    environment:
-      POSTGRES_USER: 'postgres'
-      POSTGRES_PASSWORD: 'test'
-      POSTGRES_DB: 'postgres'
     ports:
-      - 15432:5432
-    volumes:
-      - localvolume:/var/lib/postgresql/data
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  scraper:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # One-shot — exits after scraping. Run manually or schedule via Railway cron.
+    command: fedscrape scrape
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/postgres
+      AWS_KEY: ""
+      AWS_SECRET: ""
+      AWS_REGION: ""
+      S3_BUCKET: ""
+    restart: "no"
+
+  mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: fedscrape mcp-serve
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      API_BASE_URL: http://api:8000
+    stdin_open: true
+    tty: true
+
 volumes:
-  localvolume: null
+  pgdata:
