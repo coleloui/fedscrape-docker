@@ -92,6 +92,40 @@ async def refresh_rates(request: Request, session: AsyncSession = Depends(get_se
     return RefreshResponse(upserted=count)
 
 
+def slug_to_display(slug: str) -> str:
+    """Convert a rate-type slug to a human-readable label, e.g. treasury_10y -> Treasury 10Y."""
+    return " ".join(
+        part.upper() if len(part) <= 2 else part.capitalize() for part in slug.split("_")
+    )
+
+
+@router.get("/types")
+async def list_rate_types():
+    """Return all known rate-type slugs mapped to human-readable display names."""
+    return {"rate_types": {slug: slug_to_display(slug) for slug in RATE_TYPES}}
+
+
+@router.get("/{rate_type}/average")
+@limiter.limit("60/minute")
+async def rate_average(
+    request: Request,
+    rate_type: str,
+    days: int = Query(30, ge=1, le=3650, description="Trailing window size in days"),
+    session: AsyncSession = Depends(get_session),
+):
+    """Return the mean of the most recent `days` non-null values for a rate type."""
+    if rate_type not in RATE_TYPES:
+        raise HTTPException(status_code=404, detail=f"Unknown rate type: {rate_type!r}")
+
+    average = await get_average(session, rate_type, days=days)
+    return {
+        "rate_type": rate_type,
+        "display_name": slug_to_display(rate_type),
+        "days": days,
+        "average": average,
+    }
+
+
 @router.get("/{rate_type}", response_model=RateSeriesResponse)
 @limiter.limit("60/minute")
 async def rate_series(
