@@ -59,3 +59,14 @@ class SpreadResponse(BaseModel):
 
 class RefreshResponse(BaseModel):
     upserted: int
+
+
+class RateTypesResponse(BaseModel):
+    rate_types: dict[str, str]
+
+
+class RateAverageResponse(BaseModel):
+    rate_type: str
+    display_name: str
+    days: int
+    average: Optional[float] = None

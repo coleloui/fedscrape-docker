@@ -1,6 +1,7 @@
 """Rate data endpoints."""
 
 import logging
+import re
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,9 +9,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from api.cache import cache_delete_pattern, cache_get, cache_set
 from api.limiter import limiter
 from api.models.rate import (
+    RateAverageResponse,
     RateResponse,
     RateSeriesEntry,
     RateSeriesResponse,
+    RateTypesResponse,
     RefreshResponse,
     SpreadResponse,
 )
@@ -92,20 +95,30 @@ async def refresh_rates(request: Request, session: AsyncSession = Depends(get_se
     return RefreshResponse(upserted=count)
 
 
+_DURATION_SUFFIX = re.compile(r"^(\d+)([a-z])$")
+
+
 def slug_to_display(slug: str) -> str:
     """Convert a rate-type slug to a human-readable label, e.g. treasury_10y -> Treasury 10Y."""
-    return " ".join(
-        part.upper() if len(part) <= 2 else part.capitalize() for part in slug.split("_")
-    )
+    parts = []
+    for part in slug.split("_"):
+        duration_match = _DURATION_SUFFIX.match(part)
+        if duration_match:
+            parts.append(duration_match.group(1) + duration_match.group(2).upper())
+        elif len(part) <= 2:
+            parts.append(part.upper())
+        else:
+            parts.append(part.capitalize())
+    return " ".join(parts)
 
 
-@router.get("/types")
+@router.get("/types", response_model=RateTypesResponse)
 async def list_rate_types():
     """Return all known rate-type slugs mapped to human-readable display names."""
     return {"rate_types": {slug: slug_to_display(slug) for slug in RATE_TYPES}}
 
 
-@router.get("/{rate_type}/average")
+@router.get("/{rate_type}/average", response_model=RateAverageResponse)
 @limiter.limit("60/minute")
 async def rate_average(
     request: Request,
