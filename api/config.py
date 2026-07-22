@@ -1,4 +1,3 @@
-from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -7,13 +6,6 @@ class Settings(BaseSettings):
     API_PORT: int = 8000
     PORT: int = 8000  # Railway injects $PORT
     API_BASE_URL: str = "http://localhost:8000"
-    INTERNAL_API_URL: str = ""  # defaults to http://localhost:{PORT}; set explicitly to override
-
-    @model_validator(mode="after")
-    def set_internal_api_url(self) -> "Settings":
-        if not self.INTERNAL_API_URL:
-            self.INTERNAL_API_URL = f"http://localhost:{self.PORT}"
-        return self
 
     REDIS_URL: str = "redis://localhost:6379"
     APP_ENV: str = ""  # set to "test" in CI to disable rate limiting during tests

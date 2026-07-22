@@ -3,28 +3,14 @@
 import json
 import logging
 
-import httpx
 from anthropic import AsyncAnthropic
 
 from api.config import settings
+from db.crud import get_average, get_latest, get_series
+from db.models import RATE_TYPES
+from db.session import AsyncSessionLocal
 
 logger = logging.getLogger(__name__)
-
-INTERNAL_API_URL = f"http://localhost:{settings.PORT}"
-
-_RATE_TYPES = [
-    "federal_funds",
-    "cp_nonfinancial_1m", "cp_nonfinancial_2m", "cp_nonfinancial_3m",
-    "cp_financial_1m", "cp_financial_2m", "cp_financial_3m",
-    "bank_prime_loan",
-    "discount_window_primary",
-    "tbill_4w", "tbill_3m", "tbill_6m", "tbill_1y",
-    "treasury_1m", "treasury_3m", "treasury_6m",
-    "treasury_1y", "treasury_2y", "treasury_3y", "treasury_5y",
-    "treasury_7y", "treasury_10y", "treasury_20y", "treasury_30y",
-    "tips_5y", "tips_7y", "tips_10y", "tips_20y", "tips_30y",
-    "inflation_long_term",
-]
 
 _SYSTEM_PROMPT = """\
 You are a Federal Reserve interest rate analyst with access to real-time \
@@ -125,59 +111,60 @@ TOOLS = [
 ]
 
 
-async def _execute_tool(name: str, tool_input: dict, base_url: str) -> str:
+async def _execute_tool(name: str, tool_input: dict) -> str:
     try:
-        async with httpx.AsyncClient(timeout=15.0) as http:
-            if name == "list_rate_types":
-                return json.dumps(_RATE_TYPES)
+        if name == "list_rate_types":
+            return json.dumps(RATE_TYPES)
 
-            elif name == "get_latest_rates":
-                resp = await http.get(f"{base_url}/rates/latest")
-                resp.raise_for_status()
-                data = resp.json()
-                fields = tool_input.get("fields")
-                if fields:
-                    data = {k: v for k, v in data.items() if k == "date" or k in fields}
-                return json.dumps(data)
+        elif name == "get_latest_rates":
+            async with AsyncSessionLocal() as session:
+                record = await get_latest(session)
+            if record is None:
+                return json.dumps({"error": "No rate data available."})
+            data = record.model_dump(mode="json")
+            fields = tool_input.get("fields")
+            if fields:
+                data = {k: v for k, v in data.items() if k == "date" or k in fields}
+            return json.dumps(data)
 
-            elif name == "get_rate_series":
-                rate_type = tool_input["rate_type"]
-                limit = tool_input.get("limit", 30)
-                resp = await http.get(
-                    f"{base_url}/rates/{rate_type}", params={"limit": limit}
+        elif name == "get_rate_series":
+            rate_type = tool_input["rate_type"]
+            limit = tool_input.get("limit", 30)
+            async with AsyncSessionLocal() as session:
+                rows = await get_series(session, rate_type, limit)
+            return json.dumps({
+                "rate_type": rate_type,
+                "data": [{"date": str(r["date"]), "value": r["value"]} for r in rows],
+            })
+
+        elif name == "get_rate_average":
+            rate_type = tool_input["rate_type"]
+            days = tool_input.get("days", 30)
+            async with AsyncSessionLocal() as session:
+                avg = await get_average(session, rate_type, days)
+            return json.dumps({"rate_type": rate_type, "days": days, "average": avg})
+
+        elif name == "get_yield_spread":
+            rate_a = tool_input["rate_a"]
+            rate_b = tool_input["rate_b"]
+            async with AsyncSessionLocal() as session:
+                record = await get_latest(session)
+            if record is None:
+                return json.dumps({"error": "No rate data available."})
+            val_a = getattr(record, rate_a)
+            val_b = getattr(record, rate_b)
+            try:
+                spread = float(val_a) - float(val_b)
+            except (TypeError, ValueError):
+                return json.dumps(
+                    {"error": "Cannot compute spread — one or both rates are unavailable (n.a.)."}
                 )
-                resp.raise_for_status()
-                return json.dumps(resp.json())
+            return json.dumps(
+                {"date": str(record.date), "rate_a": rate_a, "rate_b": rate_b, "spread": spread}
+            )
 
-            elif name == "get_rate_average":
-                rate_type = tool_input["rate_type"]
-                days = tool_input.get("days", 30)
-                resp = await http.get(
-                    f"{base_url}/rates/{rate_type}", params={"limit": days}
-                )
-                resp.raise_for_status()
-                entries = resp.json().get("data", [])
-                values = []
-                for entry in entries:
-                    v = entry.get("value")
-                    if v and v != "n.a.":
-                        try:
-                            values.append(float(v))
-                        except (TypeError, ValueError):
-                            pass
-                avg = sum(values) / len(values) if values else None
-                return json.dumps({"rate_type": rate_type, "days": days, "average": avg})
-
-            elif name == "get_yield_spread":
-                resp = await http.get(
-                    f"{base_url}/rates/spread",
-                    params={"rate_a": tool_input["rate_a"], "rate_b": tool_input["rate_b"]},
-                )
-                resp.raise_for_status()
-                return json.dumps(resp.json())
-
-            else:
-                return json.dumps({"error": f"Unknown tool: {name}"})
+        else:
+            return json.dumps({"error": f"Unknown tool: {name}"})
 
     except Exception as exc:
         logger.warning("Tool %s failed: %s", name, exc)
@@ -193,7 +180,6 @@ async def run_chat(messages: list[dict]) -> dict:
     Returns {"message": str, "tool_calls_made": int}.
     """
     client = AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
-    base_url = INTERNAL_API_URL
     tool_calls_made = 0
     msgs = list(messages)
 
@@ -225,7 +211,7 @@ async def run_chat(messages: list[dict]) -> dict:
                 if block.type == "tool_use":
                     tool_calls_made += 1
                     logger.info("Tool call: %s", block.name)
-                    result_str = await _execute_tool(block.name, block.input, base_url)
+                    result_str = await _execute_tool(block.name, block.input)
                     tool_results.append({
                         "type": "tool_result",
                         "tool_use_id": block.id,
