@@ -191,7 +191,7 @@ async def run_chat(messages: list[dict]) -> dict:
     Returns {"message": str, "tool_calls_made": int}.
     """
     client = AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
-    base_url = f"http://localhost:{settings.PORT}"
+    base_url = settings.INTERNAL_API_URL
     tool_calls_made = 0
     msgs = list(messages)
 
