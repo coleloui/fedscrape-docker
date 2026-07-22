@@ -1,5 +1,6 @@
 """FastAPI application factory."""
 
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -7,13 +8,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
+from api.config import settings
 from api.limiter import limiter
 from api.routes import chat, health, rates
 from db.session import init_db
 
+logger = logging.getLogger(__name__)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    logger.info("API listening internally on port %s", settings.PORT)
     await init_db()
     yield
 

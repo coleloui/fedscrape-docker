@@ -5,7 +5,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/postgres"
     API_PORT: int = 8000
-    PORT: int = 8000  # Railway overrides via $PORT
+    PORT: int = 8000  # Railway injects $PORT
     API_BASE_URL: str = "http://localhost:8000"
     INTERNAL_API_URL: str = ""  # defaults to http://localhost:{PORT}; set explicitly to override
 

@@ -10,6 +10,8 @@ from api.config import settings
 
 logger = logging.getLogger(__name__)
 
+INTERNAL_API_URL = f"http://localhost:{settings.PORT}"
+
 _RATE_TYPES = [
     "federal_funds",
     "cp_nonfinancial_1m", "cp_nonfinancial_2m", "cp_nonfinancial_3m",
@@ -191,7 +193,7 @@ async def run_chat(messages: list[dict]) -> dict:
     Returns {"message": str, "tool_calls_made": int}.
     """
     client = AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
-    base_url = settings.INTERNAL_API_URL
+    base_url = INTERNAL_API_URL
     tool_calls_made = 0
     msgs = list(messages)
 
