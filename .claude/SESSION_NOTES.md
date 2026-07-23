@@ -110,15 +110,59 @@ Everything below was done from WSL. To continue from Windows:
       queries specifically, not global, so that belongs on individual
       query hooks later, not here).
 - [x] `.env.example` and `README.md` written for `fedscrape-ui/`.
-- [ ] **NOT DONE**: `App.tsx` still has Vite's boilerplate counter demo.
-      No router, no layout, no pages, no `src/pages/`, `src/hooks/`,
-      `src/types/`, `src/components/layout/`, `src/components/charts/`
-      directories yet. This is the next real chunk of work — build the 4
-      pages (Dashboard, Explorer, Yield Curve, Chat) per `frontend_prompt.md`,
-      adjusted for the schema deltas noted above (`rate_a`/`rate_b` not
-      `a`/`b`, `?days=` not `start`/`end`).
-- [ ] Custom Tailwind theme colors (zinc-950/900 + blue-400/500 palette)
-      not yet applied — still shadcn's grayscale default.
+- [x] Windows-side session (concurrent with WSL work) committed a broken
+      snapshot of the frontend WIP (`5775d9b`) plus two unrelated
+      chat-service backend fixes (`e9089c1`, `b57927c`, INTERNAL_API_URL /
+      httpx→direct-DB refactor). Reconciled in WSL: fixed the shadcn `@/`
+      literal-directory bug and the `generated` barrel import (`c832dd2`).
+- [x] All 4 pages built and wired to the live backend: Dashboard,
+      Explorer, Yield Curve, Chat. Layout with shared Navbar + Footer.
+      React Router v7 (`BrowserRouter` in `App.tsx`). Commit `846c579`,
+      pushed to `origin/main`.
+- [x] Custom dark theme applied — replaced shadcn's grayscale default
+      with a zinc/blue/green/red palette, defined **entirely as CSS custom
+      properties in `index.css`** (no bare hex anywhere else in the
+      codebase, per explicit user preference). Added `--color-chart-*`
+      tokens specifically because Recharts SVG props (`stroke`/`fill`)
+      can't consume Tailwind utility classes — chart components reference
+      `var(--color-chart-line)` etc. instead. Also added `--color-warning*`
+      tokens for the chat disclaimer banner. `:root` and `.dark` are
+      identical (app is dark-only, no light/dark toggle).
+- [x] Chat page requirements (user-specified, not in original
+      `frontend_prompt.md`): amber warning banner above message history,
+      matching disclaimer in the footer on every page (smaller/neutral
+      styling, not amber), pre-populated welcome assistant message on
+      load, and `react-markdown` + `remark-gfm` (+ `@tailwindcss/typography`
+      for `prose` styling) rendering assistant messages so markdown
+      tables/headers/bold render properly instead of showing raw syntax.
+      Verified end-to-end with a real chat round-trip — backend returned
+      a markdown table that rendered correctly.
+- [x] Explorer page deviates from `frontend_prompt.md`'s "start/end date
+      pickers" — the backend's `/rates/{rate_type}` only supports a
+      trailing `limit` (number of records), not arbitrary date-range
+      filtering, so Explorer exposes a "last N days" dropdown (30/90/180/
+      365) instead of fabricating date-picker UI the API can't actually
+      serve. Same constraint applies anywhere else a date range might
+      seem natural — check the OpenAPI schema's query params before
+      building date-picker UI.
+- [x] Yield Curve's "shape over time" chart shows the latest curve only,
+      not latest/1yr-ago/2yr-ago as `frontend_prompt.md` asked — the API
+      has no point-in-time lookup (only trailing series from today), so
+      the 1yr/2yr-ago slices can't be computed from what's exposed.
+      Documented inline in `CurveShapeChart`'s comment.
+- [x] Fixed a real bug caught by headless testing (not by tsc/eslint):
+      Yield Curve's spread-history chart requested `limit=730` but
+      `/rates/{rate_type}` caps `limit` at 365 server-side → 422s. Fixed
+      to `SPREAD_HISTORY_DAYS = 365`, card title changed from "(2 Years)"
+      to "(1 Year)" to match. This class of bug (query params exceeding
+      backend-declared limits) won't show up in typecheck/lint — worth
+      an actual network-level check when adding new date-range queries.
+- [x] Verified via `tsc -b`, `eslint`, `npm run build` (production build
+      succeeds, ~325kB gzipped main chunk — large-chunk warning noted but
+      not addressed, code-splitting would be the fix if it matters later),
+      and headless Playwright checks (installed ad hoc in the scratchpad
+      dir, not a project dependency) against all 4 routes with the live
+      backend — zero console errors, real data rendering.
 - [ ] Add repo-wide pre-commit hook: Ruff + Pyright for Python (not
       currently configured despite `.claude/claude.md` claiming it is —
       no `.pre-commit-config.yaml`, no ruff/pyright in `pyproject.toml`
