@@ -19,6 +19,8 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("API listening internally on port %s", settings.PORT)
+    # TODO: Replace create_all() with Alembic before first schema
+    # change post-launch. Add Railway release command: alembic upgrade head
     await init_db()
     yield
 
