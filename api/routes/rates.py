@@ -18,7 +18,7 @@ from api.models.rate import (
     SpreadResponse,
 )
 from api.services.scraper import scrape_latest
-from db.crud import get_average, get_by_date, get_latest, get_series, upsert_records
+from db.crud import get_average, get_latest, get_series, upsert_records
 from db.models import RATE_TYPES
 from db.session import get_session
 

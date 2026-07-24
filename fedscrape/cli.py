@@ -8,7 +8,6 @@ FedScrape CLI — application entrypoints.
 
 import asyncio
 import logging
-import sys
 
 import typer
 from rich.console import Console

@@ -5,7 +5,7 @@ from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import desc, select
 
-from db.models import RATE_TYPES, RateRecord
+from db.models import RateRecord
 
 
 async def upsert_record(session: AsyncSession, record: RateRecord) -> None:

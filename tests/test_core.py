@@ -7,9 +7,8 @@ the case where no DB is available (CI without Postgres).
 
 import pytest
 
-from api.services.scraper import _month_to_number, _build_dataframe
+from api.services.scraper import _month_to_number
 from db.models import RATE_TYPES, SCRAPE_COLUMN_MAP
-
 
 # ---------------------------------------------------------------------------
 # Scraper unit tests (no network, no DB)
