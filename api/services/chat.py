@@ -67,13 +67,20 @@ TOOLS = [
         "type": "function",
         "function": {
             "name": "get_rate_series",
-            "description": "Return a time series for a single rate type slug.",
+            "description": (
+                "Return a time series for a single rate type slug. "
+                "Use list_rate_types to get valid slugs before calling this."
+            ),
             "parameters": {
                 "type": "object",
                 "properties": {
                     "rate_type": {
                         "type": "string",
-                        "description": "Rate type slug (e.g. treasury_10y).",
+                        "description": (
+                            "Rate type slug — must be an exact value"
+                            " from list_rate_types"
+                            " (e.g. 'federal_funds', 'treasury_10y')."
+                        ),
                     },
                     "limit": {
                         "type": "integer",
@@ -88,13 +95,20 @@ TOOLS = [
         "type": "function",
         "function": {
             "name": "get_rate_average",
-            "description": "Return the mean of the most recent N values.",
+            "description": (
+                "Return the mean of the most recent N values. "
+                "Use list_rate_types to get valid slugs before calling this."
+            ),
             "parameters": {
                 "type": "object",
                 "properties": {
                     "rate_type": {
                         "type": "string",
-                        "description": "Rate type slug.",
+                        "description": (
+                            "Rate type slug — must be an exact value"
+                            " from list_rate_types"
+                            " (e.g. 'federal_funds', 'treasury_10y')."
+                        ),
                     },
                     "days": {
                         "type": "integer",
@@ -109,17 +123,28 @@ TOOLS = [
         "type": "function",
         "function": {
             "name": "get_yield_spread",
-            "description": "Compute spread (rate_a - rate_b) from latest record.",
+            "description": (
+                "Compute spread (rate_a - rate_b) from latest record. "
+                "Use list_rate_types to get valid slugs before calling this."
+            ),
             "parameters": {
                 "type": "object",
                 "properties": {
                     "rate_a": {
                         "type": "string",
-                        "description": "First rate type slug.",
+                        "description": (
+                            "First rate type slug — must be an exact"
+                            " value from list_rate_types"
+                            " (e.g. 'federal_funds', 'treasury_10y')."
+                        ),
                     },
                     "rate_b": {
                         "type": "string",
-                        "description": "Second rate type slug.",
+                        "description": (
+                            "Second rate type slug — must be an exact"
+                            " value from list_rate_types"
+                            " (e.g. 'federal_funds', 'treasury_2y')."
+                        ),
                     },
                 },
                 "required": ["rate_a", "rate_b"],
@@ -147,6 +172,13 @@ async def _execute_tool(name: str, tool_input: dict) -> str:
 
         elif name == "get_rate_series":
             rate_type = tool_input["rate_type"]
+            if rate_type not in RATE_TYPES:
+                return json.dumps({
+                    "error": (
+                        f"Unknown rate type slug: {rate_type!r}."
+                        " Call list_rate_types to see valid options."
+                    )
+                })
             limit = tool_input.get("limit", 30)
             async with AsyncSessionLocal() as session:
                 rows = await get_series(session, rate_type, limit)
@@ -157,6 +189,13 @@ async def _execute_tool(name: str, tool_input: dict) -> str:
 
         elif name == "get_rate_average":
             rate_type = tool_input["rate_type"]
+            if rate_type not in RATE_TYPES:
+                return json.dumps({
+                    "error": (
+                        f"Unknown rate type slug: {rate_type!r}."
+                        " Call list_rate_types to see valid options."
+                    )
+                })
             days = tool_input.get("days", 30)
             async with AsyncSessionLocal() as session:
                 avg = await get_average(session, rate_type, days)
@@ -165,6 +204,14 @@ async def _execute_tool(name: str, tool_input: dict) -> str:
         elif name == "get_yield_spread":
             rate_a = tool_input["rate_a"]
             rate_b = tool_input["rate_b"]
+            for slug in (rate_a, rate_b):
+                if slug not in RATE_TYPES:
+                    return json.dumps({
+                        "error": (
+                            f"Unknown rate type slug: {slug!r}."
+                            " Call list_rate_types to see valid options."
+                        )
+                    })
             async with AsyncSessionLocal() as session:
                 record = await get_latest(session)
             if record is None:
