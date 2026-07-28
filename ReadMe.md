@@ -17,6 +17,8 @@ Health check: `https://fed-scrape-api.up.railway.app/health`
 
 ## Frontend
 
+**Live:** https://fedrate-production.up.railway.app/
+
 `fedscrape-ui/` is a Vite + React dashboard consuming this API — see
 [`fedscrape-ui/README.md`](fedscrape-ui/README.md).
 
