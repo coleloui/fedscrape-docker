@@ -1,9 +1,9 @@
-"""Anthropic-backed chat service with Fed H.15 rate tools."""
+"""Groq-backed chat service with Fed H.15 rate tools."""
 
 import json
 import logging
 
-from anthropic import AsyncAnthropic
+from groq import AsyncGroq
 
 from api.config import settings
 from db.crud import get_average, get_latest, get_series
@@ -29,83 +29,101 @@ including Fed Funds, Treasury bills, Treasury notes/bonds (nominal and TIPS), \
 commercial paper, and bank prime loan rate.\
 """
 
+# OpenAI/Groq tool format
 TOOLS = [
     {
-        "name": "list_rate_types",
-        "description": "List all available Fed H.15 rate type slugs.",
-        "input_schema": {
-            "type": "object",
-            "properties": {},
-            "required": [],
+        "type": "function",
+        "function": {
+            "name": "list_rate_types",
+            "description": "List all available Fed H.15 rate type slugs.",
+            "parameters": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+            },
         },
     },
     {
-        "name": "get_latest_rates",
-        "description": "Return the most recent Fed H.15 rate record (all rate types).",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "fields": {
-                    "type": "array",
-                    "items": {"type": "string"},
-                    "description": "Optional subset of rate type slugs to include in the response.",
+        "type": "function",
+        "function": {
+            "name": "get_latest_rates",
+            "description": "Return the most recent Fed H.15 rate record.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "fields": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": (
+                            "Optional subset of rate type slugs to include."
+                        ),
+                    },
                 },
+                "required": [],
             },
-            "required": [],
         },
     },
     {
-        "name": "get_rate_series",
-        "description": "Return a time series for a single rate type slug.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "rate_type": {
-                    "type": "string",
-                    "description": "Rate type slug (e.g. treasury_10y).",
+        "type": "function",
+        "function": {
+            "name": "get_rate_series",
+            "description": "Return a time series for a single rate type slug.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "rate_type": {
+                        "type": "string",
+                        "description": "Rate type slug (e.g. treasury_10y).",
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "description": "Records to return (1-365, default 30).",
+                    },
                 },
-                "limit": {
-                    "type": "integer",
-                    "description": "Number of records to return (1–365, default 30).",
-                },
+                "required": ["rate_type"],
             },
-            "required": ["rate_type"],
         },
     },
     {
-        "name": "get_rate_average",
-        "description": "Return the mean of the most recent N values for a rate type.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "rate_type": {
-                    "type": "string",
-                    "description": "Rate type slug.",
+        "type": "function",
+        "function": {
+            "name": "get_rate_average",
+            "description": "Return the mean of the most recent N values.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "rate_type": {
+                        "type": "string",
+                        "description": "Rate type slug.",
+                    },
+                    "days": {
+                        "type": "integer",
+                        "description": "Recent records to average (default 30).",
+                    },
                 },
-                "days": {
-                    "type": "integer",
-                    "description": "Number of recent records to average (default 30).",
-                },
+                "required": ["rate_type"],
             },
-            "required": ["rate_type"],
         },
     },
     {
-        "name": "get_yield_spread",
-        "description": "Compute the spread (rate_a − rate_b) from the latest record.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "rate_a": {
-                    "type": "string",
-                    "description": "First rate type slug.",
+        "type": "function",
+        "function": {
+            "name": "get_yield_spread",
+            "description": "Compute spread (rate_a - rate_b) from latest record.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "rate_a": {
+                        "type": "string",
+                        "description": "First rate type slug.",
+                    },
+                    "rate_b": {
+                        "type": "string",
+                        "description": "Second rate type slug.",
+                    },
                 },
-                "rate_b": {
-                    "type": "string",
-                    "description": "Second rate type slug.",
-                },
+                "required": ["rate_a", "rate_b"],
             },
-            "required": ["rate_a", "rate_b"],
         },
     },
 ]
@@ -157,11 +175,14 @@ async def _execute_tool(name: str, tool_input: dict) -> str:
                 spread = float(val_a) - float(val_b)
             except (TypeError, ValueError):
                 return json.dumps(
-                    {"error": "Cannot compute spread — one or both rates are unavailable (n.a.)."}
+                    {"error": "Cannot compute spread — rate unavailable (n.a.)."}
                 )
-            return json.dumps(
-                {"date": str(record.date), "rate_a": rate_a, "rate_b": rate_b, "spread": spread}
-            )
+            return json.dumps({
+                "date": str(record.date),
+                "rate_a": rate_a,
+                "rate_b": rate_b,
+                "spread": spread,
+            })
 
         else:
             return json.dumps({"error": f"Unknown tool: {name}"})
@@ -173,54 +194,59 @@ async def _execute_tool(name: str, tool_input: dict) -> str:
 
 async def run_chat(messages: list[dict]) -> dict:
     """
-    Run a tool-augmented chat turn against the Anthropic API.
+    Run a tool-augmented chat turn against the Groq API.
 
     Accepts the full conversation history (list of role/content dicts).
-    Loops until Claude stops requesting tool calls.
+    Loops until the model stops requesting tool calls.
     Returns {"message": str, "tool_calls_made": int}.
     """
-    client = AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
+    client = AsyncGroq(api_key=settings.GROQ_API_KEY)
     tool_calls_made = 0
-    msgs = list(messages)
+    msgs: list[dict] = list(messages)
 
     while True:
-        response = await client.messages.create(
-            model=settings.ANTHROPIC_MODEL,
+        response = await client.chat.completions.create(
+            model=settings.GROQ_MODEL,
             max_tokens=4096,
-            system=_SYSTEM_PROMPT,
+            messages=[{"role": "system", "content": _SYSTEM_PROMPT}] + msgs,
             tools=TOOLS,
-            messages=msgs,
         )
 
-        if response.stop_reason == "tool_use":
-            assistant_content = []
-            for block in response.content:
-                if block.type == "text":
-                    assistant_content.append({"type": "text", "text": block.text})
-                elif block.type == "tool_use":
-                    assistant_content.append({
-                        "type": "tool_use",
-                        "id": block.id,
-                        "name": block.name,
-                        "input": block.input,
-                    })
-            msgs.append({"role": "assistant", "content": assistant_content})
+        choice = response.choices[0]
 
-            tool_results = []
-            for block in response.content:
-                if block.type == "tool_use":
-                    tool_calls_made += 1
-                    logger.info("Tool call: %s", block.name)
-                    result_str = await _execute_tool(block.name, block.input)
-                    tool_results.append({
-                        "type": "tool_result",
-                        "tool_use_id": block.id,
-                        "content": result_str,
-                    })
-            msgs.append({"role": "user", "content": tool_results})
+        if choice.finish_reason == "tool_calls":
+            message = choice.message
+            # content may be None when tool_calls are present
+            msgs.append({
+                "role": "assistant",
+                "content": message.content or "",
+                "tool_calls": [
+                    {
+                        "id": tc.id,
+                        "type": "function",
+                        "function": {
+                            "name": tc.function.name,
+                            "arguments": tc.function.arguments,
+                        },
+                    }
+                    for tc in message.tool_calls
+                ],
+            })
+
+            # Execute each tool and append results as role="tool" messages
+            for tc in message.tool_calls:
+                tool_calls_made += 1
+                logger.info("Tool call: %s", tc.function.name)
+                tool_input = json.loads(tc.function.arguments)
+                result_str = await _execute_tool(tc.function.name, tool_input)
+                msgs.append({
+                    "role": "tool",
+                    "tool_call_id": tc.id,
+                    "content": result_str,
+                })
 
         else:
-            text = "".join(
-                block.text for block in response.content if hasattr(block, "text")
-            )
-            return {"message": text, "tool_calls_made": tool_calls_made}
+            return {
+                "message": choice.message.content or "",
+                "tool_calls_made": tool_calls_made,
+            }

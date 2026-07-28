@@ -15,8 +15,8 @@ class Settings(BaseSettings):
     AWS_REGION: str = ""
     S3_BUCKET: str = ""
 
-    ANTHROPIC_API_KEY: str = ""
-    ANTHROPIC_MODEL: str = "claude-sonnet-4-6"
+    GROQ_API_KEY: str = ""
+    GROQ_MODEL: str = "llama-3.1-70b-versatile"
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
