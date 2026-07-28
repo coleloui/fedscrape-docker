@@ -40,10 +40,12 @@ function TooltipContent({
 }
 
 export function RateSeriesChart({ data }: { data: SeriesPoint[] }) {
-  const chartData: ChartPoint[] = data.map(point => ({
-    date: point.date,
-    value: parseRateValue(point.value),
-  }))
+  const chartData: ChartPoint[] = data
+    .map(point => ({
+      date: point.date,
+      value: parseRateValue(point.value),
+    }))
+    .sort((a, b) => a.date.localeCompare(b.date))
 
   return (
     <ResponsiveContainer width='100%' height={300}>

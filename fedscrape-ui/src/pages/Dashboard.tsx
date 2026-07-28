@@ -96,7 +96,7 @@ export function Dashboard() {
   const { data: latest, isLoading: latestLoading } = useLatestRates()
   const { data: fedFundsSeries, isLoading: seriesLoading } = useRateSeries(
     'federal_funds',
-    365,
+    30,
   )
 
   return (
@@ -125,7 +125,7 @@ export function Dashboard() {
       <Card className='border-border bg-card'>
         <CardHeader>
           <CardTitle className='text-base font-normal text-muted-foreground'>
-            Fed Funds Rate (1 Year)
+            Fed Funds Rate (1 Month)
           </CardTitle>
         </CardHeader>
         <CardContent>
