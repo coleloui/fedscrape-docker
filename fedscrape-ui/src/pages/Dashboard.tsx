@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import type { TooltipValueType } from 'recharts'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -93,11 +94,17 @@ function YieldCurveSnapshot({ latest }: { latest: RateResponse }) {
 }
 
 export function Dashboard() {
-  const { data: latest, isLoading: latestLoading } = useLatestRates()
-  const { data: fedFundsSeries, isLoading: seriesLoading } = useRateSeries(
+  const [selectedRate, setSelectedRate] = useState<keyof RateResponse>(
     'federal_funds',
+  )
+  const { data: latest, isLoading: latestLoading } = useLatestRates()
+  const { data: rateSeries, isLoading: seriesLoading } = useRateSeries(
+    selectedRate as string,
     30,
   )
+
+  const selectedLabel =
+    KEY_RATES.find(r => r.key === selectedRate)?.label ?? selectedRate
 
   return (
     <div className='flex flex-col gap-6'>
@@ -112,6 +119,8 @@ export function Dashboard() {
                 label={rate.label}
                 value={latest[rate.key] as string | null | undefined}
                 date={latest.date}
+                isSelected={selectedRate === rate.key}
+                onClick={() => setSelectedRate(rate.key)}
               />
             ))}
       </div>
@@ -125,14 +134,14 @@ export function Dashboard() {
       <Card className='border-border bg-card'>
         <CardHeader>
           <CardTitle className='text-base font-normal text-muted-foreground'>
-            Fed Funds Rate (1 Month)
+            {selectedLabel} (1 Month)
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {seriesLoading || !fedFundsSeries ? (
+          {seriesLoading || !rateSeries ? (
             <Skeleton className='h-72 rounded-lg' />
           ) : (
-            <RateSeriesChart data={fedFundsSeries.data} />
+            <RateSeriesChart data={rateSeries.data} />
           )}
         </CardContent>
       </Card>
