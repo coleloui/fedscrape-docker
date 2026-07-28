@@ -57,6 +57,7 @@ export function RateSeriesChart({ data }: { data: SeriesPoint[] }) {
           stroke='var(--color-chart-axis)'
           fontSize={12}
           tickLine={false}
+          interval={Math.floor(chartData.length / 5)}
         />
         <YAxis
           stroke='var(--color-chart-axis)'
