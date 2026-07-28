@@ -34,6 +34,14 @@ export function Navbar() {
             </NavLink>
           ))}
         </nav>
+        <a
+          href='https://ko-fi.com/fedrate'
+          target='_blank'
+          rel='noopener noreferrer'
+          className='ml-auto whitespace-nowrap rounded-md border border-zinc-700 px-3 py-1.5 text-sm text-zinc-400 transition-colors duration-200 hover:border-blue-500 hover:text-white'
+        >
+          ☕<span className='hidden sm:inline'> Support</span>
+        </a>
       </div>
     </header>
   )
