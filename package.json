@@ -1,0 +1,26 @@
+{
+  "name": "fedscrape-git-hooks",
+  "private": true,
+  "scripts": {
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.5"
+  },
+  "lint-staged": {
+    "fedscrape-ui/src/**/*.{js,jsx,ts,tsx}": [
+      "npm --prefix fedscrape-ui exec prettier -- --write",
+      "npm --prefix fedscrape-ui exec eslint -- --fix"
+    ],
+    "fedscrape-ui/**/*.{json,css,md}": [
+      "npm --prefix fedscrape-ui exec prettier -- --write"
+    ],
+    "fedscrape-ui/src/**/*.{ts,tsx}": [
+      "bash -c 'cd fedscrape-ui && npx tsc -b'"
+    ],
+    "*.py": [
+      "ruff check --fix"
+    ]
+  }
+}
