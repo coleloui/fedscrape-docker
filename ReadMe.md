@@ -1,77 +1,44 @@
 # FedScrape
 
-FastAPI + MCP server that scrapes and serves Federal Reserve H.15 interest rate data. Rates are fetched from the Fed's published release, stored in PostgreSQL, and exposed via a REST API and an MCP (Model Context Protocol) server for LLM tool use.
+FastAPI + MCP server that scrapes and serves Federal Reserve H.15 interest rate data. Rates are fetched from the Fed's published release, stored in PostgreSQL, and exposed via a REST API, a chat interface backed by Claude, and an MCP (Model Context Protocol) server for LLM tool use.
 
-## Setup
+This is a personal project, shared publicly for portfolio/reference
+purposes — see [LICENSE](LICENSE). It isn't intended to be self-hosted or
+redeployed by others.
 
-### Docker Compose (recommended)
+## Live deployment
 
-```
-docker-compose up -d --build
-```
+The API is live on Railway at:
 
-Configure credentials in `docker-compose.yml` under `python_app -> environment`:
+**`https://fed-scrape-api.up.railway.app`**
 
-```
-DB_USER:
-DB_PASSWORD:
-DB_PORT:
-```
+Interactive docs: `https://fed-scrape-api.up.railway.app/docs`
+Health check: `https://fed-scrape-api.up.railway.app/health`
 
-And under `database -> environment`:
+## Frontend
 
-```
-POSTGRES_USER:
-POSTGRES_PASSWORD:
-POSTGRES_DB:
-```
-
-### Standalone container
-
-```
-docker build . -t fedscrape-docker:localhost
-docker run -t -d fedscrape-docker:localhost
-```
-
-Exec into the container:
-
-```
-docker container ls
-docker exec -it <CONTAINER_ID> /bin/bash
-```
-
-## Commands
-
-The `fedscrape` CLI is the entrypoint for all operations.
-
-```
-fedscrape serve          Start the REST API server (default: 0.0.0.0:8000)
-fedscrape scrape         Fetch the latest Fed H.15 data and upsert into the DB
-fedscrape mcp-serve      Start the MCP server (stdio transport)
-```
-
-Options for `fedscrape serve`:
-
-```
---host TEXT        Bind host (default: 0.0.0.0)
---port INTEGER     Bind port (default: 8000, env: API_PORT)
---reload           Enable auto-reload for development
---log-level TEXT   Uvicorn log level (default: info)
-```
-
-Options for `fedscrape scrape`:
-
-```
---dry-run          Parse and log records without writing to the database
-```
+`fedscrape-ui/` is a Vite + React dashboard consuming this API — see
+[`fedscrape-ui/README.md`](fedscrape-ui/README.md).
 
 ## API
-
-Once the server is running, interactive docs are available at `http://localhost:8000/docs`.
 
 Key endpoints:
 
 ```
-GET /health          Health check
-GET /rates           List interest rates (filterable by series and date range)
+GET  /health                          Health check
+GET  /rates/latest                    Most recent H.15 record
+GET  /rates/types                     All rate-type slugs + display names
+GET  /rates/{rate_type}                Time series for one rate type
+GET  /rates/{rate_type}/average        Trailing-window average for one rate type
+GET  /rates/spread                     Yield spread between two rate types
+POST /chat                              Conversational interface backed by Claude + rate tools
 ```
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for the full endpoint reference, rate
+limits, available rate-type slugs, and a `/chat` example.
+
+## How it's deployed
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for how the live Railway deployment is
+configured (services, env vars, cron scraper schedule, CI/CD) — kept as a
+reference for maintaining this specific deployment, not a self-hosting guide.

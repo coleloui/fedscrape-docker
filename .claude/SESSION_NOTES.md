@@ -163,15 +163,88 @@ Everything below was done from WSL. To continue from Windows:
       and headless Playwright checks (installed ad hoc in the scratchpad
       dir, not a project dependency) against all 4 routes with the live
       backend — zero console errors, real data rendering.
-- [ ] Add repo-wide pre-commit hook: Ruff + Pyright for Python (not
-      currently configured despite `.claude/claude.md` claiming it is —
-      no `.pre-commit-config.yaml`, no ruff/pyright in `pyproject.toml`
-      deps), plus husky + lint-staged wired to `fedscrape-ui`'s
-      lint/format/typecheck scripts (pineframe's root `package.json`
-      `lint-staged` config is the template — see there for the exact
-      prettier→eslint→tsc chain).
-- [ ] Write `.claude/backend.md`, `database.md`, `testing.md`,
-      `api-generation.md`, `git-hooks.md`, `frontend.md`.
+- [x] Ruff added (not Pyright — user explicitly said don't touch Pyright;
+      555 strict-mode findings are mostly missing-stub noise from pytest
+      fixtures, not real bugs, address incrementally later instead of in
+      a bulk pass). `[tool.ruff]` in `pyproject.toml`: `line-length = 88`,
+      `select = ["E", "F", "I"]`. Ran `ruff check --fix` once (86 findings,
+      74 auto-fixed — mostly unused imports / import sorting; 16 remaining
+      `E501` line-length violations left untouched, not auto-fixable
+      safely). Added `ruff check .` as a CI step in `.github/workflows/ci.yml`
+      before the pytest step. Commit `be6d4ea`, pushed.
+- [x] Alembic was scaffolded (`db/alembic/`, baseline migration for
+      `RateRecord`) then **fully reverted** per explicit instruction — user
+      wants `init_db()`'s `create_all()` to stay as the source of truth
+      until the schema needs to change or before launch, since there are
+      no production users yet and no untested deploy-time changes are
+      wanted right now. Added a TODO comment in `api/main.py`'s
+      `lifespan()` marking the future switch (Railway release command:
+      `alembic upgrade head`). Commit `b4e17bf`, pushed. **Do not
+      re-introduce Alembic without being asked again** — this was tried
+      once and explicitly undone.
+- [x] Repo-wide pre-commit hook added: husky + lint-staged at repo root
+      (new root `package.json`, `.husky/pre-commit` runs `npx lint-staged`).
+      Config covers `fedscrape-ui/src/**/*.{js,jsx,ts,tsx}` (prettier +
+      eslint --fix), `fedscrape-ui/**/*.{json,css,md}` (prettier), 
+      `fedscrape-ui/src/**/*.{ts,tsx}` (tsc -b, no-emit typecheck), and
+      root `*.py` (`ruff check --fix`). Adapted from pineframe's root
+      `package.json` lint-staged block, but npm not pnpm, and no
+      `postinstall` chain since Python deps aren't npm-managed.
+      **Caveat**: the `*.py` rule assumes `ruff` is on PATH, i.e. the
+      committer's Python venv is active — no PATH-detection fallback was
+      added (user's ruff-only instructions didn't ask for one; documented
+      as a requirement in git-hooks.md instead). Verified working
+      end-to-end with a real test commit (deliberately unsorted/unused
+      import got auto-fixed by the hook before the commit landed), then
+      the test commit was `git reset --hard` off since it was scratch —
+      the real hook-setup commit (`81d437a`) stayed. Added `/node_modules/`
+      to root `.gitignore` (wasn't there before — root had no Node tooling
+      until this).
+- [x] Wrote `.claude/backend.md`, `database.md`, `testing.md`,
+      `api-generation.md`, `git-hooks.md`, `frontend.md` — all grounded in
+      the real code (read the actual files, not guessed). Also did a full
+      accuracy pass on the two pre-existing docs: `claude.md` (fixed
+      claims about Alembic/Pyright pre-commit that were never true) and
+      `architecture.md` (directory tree had wrong paths — `db/database.py`
+      instead of `db/session.py`, `db/models/` instead of `db/models.py`,
+      `test_api.py`/`test_scraper.py` that don't exist; the entire "Key
+      Patterns" → "Docker Patterns" section, ~290 lines, was fictional
+      example code — `RateService`/`RateRepository` classes, an
+      `InterestRate` model, a `cache.cached()` decorator, TaskIQ, none of
+      which exist — replaced with descriptions of the real patterns).
+- [x] **Public-facing docs reframed around the live Railway deployment,
+      not local self-hosting** — user does not want this repo (public on
+      GitHub) inviting others to run/redeploy it. Added a `LICENSE` file
+      (all-rights-reserved, explicit "viewing is fine, running/forking
+      for deployment is not"). `ReadMe.md` rewritten around the live URL
+      (`https://fed-scrape-api.up.railway.app`) instead of docker-compose
+      setup instructions; also fixed a stale/fictional `GET /rates`
+      endpoint listing. `DEPLOYMENT.md`'s "Local development" section and
+      Docker Desktop prerequisite removed, retitled "Deployment
+      *Reference*" (documents how the live deployment is configured, not
+      a self-hosting guide), added `/rates/types` and
+      `/rates/{rate_type}/average` to its endpoint table (were missing),
+      and added a real `/chat` example — verified against the actual live
+      response rather than fabricated (the model's true response is a
+      markdown table, not plain prose — worth remembering if writing
+      chat examples elsewhere: **always curl the real endpoint first**.
+      **Scope boundary**: this reframing applies to public-facing docs
+      only (`ReadMe.md`, `DEPLOYMENT.md`). The `.claude/*.md` docs
+      (including this file) keep local-dev references (`npm run dev`,
+      `localhost:8000` fallback defaults) — those are working notes for
+      Claude Code sessions and the project owner, not public setup
+      instructions, and the user explicitly confirmed they should stay
+      as-is.
+      `docker-compose.yml`/`Dockerfile` themselves were **not** touched —
+      `docker-compose.yml` is inert w.r.t. Railway (railway.toml points
+      straight at the Dockerfile) and stays as the owner's own local-dev
+      convenience; `Dockerfile` is load-bearing for the real Railway build.
+- [x] Deleted `frontend_prompt.md` (its job — spec for building the
+      frontend — was done). Fixed the one place a `.claude/*.md` doc
+      pointed at it (`frontend.md`); left references in code comments
+      (`YieldCurve.tsx`) and this file's own history alone since those
+      are explaining past decisions, not pointing readers to a file that
+      needs to exist.
 
 ## Known gotchas (don't rediscover these)
 

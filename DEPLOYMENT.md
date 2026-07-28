@@ -1,35 +1,13 @@
-# Deployment Guide — Railway
+# Deployment Reference — Railway
+
+The live deployment runs on Railway at `https://fed-scrape-api.up.railway.app`.
+This documents how that deployment is configured, for maintaining it going
+forward — it's not a self-hosting guide (see [LICENSE](LICENSE); this is a
+personal project, not intended for others to redeploy).
 
 ## Prerequisites
 
 - Railway account and CLI (`npm i -g @railway/cli`)
-- Docker Desktop (for local testing)
-
----
-
-## Local development
-
-```bash
-# Install in editable mode
-pip install -e ".[dev]"
-
-# Copy env vars
-cp .env.example .env
-# Edit .env — set DATABASE_URL to a local Postgres instance
-
-# Start Postgres + Redis + API
-docker compose up -d db redis api
-
-# Verify health
-curl http://localhost:8000/health
-# {"status":"ok","checks":{"db":"ok"},"version":"1.0.0"}
-
-# Run a scrape
-fedscrape scrape
-
-# Run tests
-pytest tests/ -v
-```
 
 ---
 
@@ -148,14 +126,55 @@ Add secrets at: **GitHub repo → Settings → Secrets and variables → Actions
 
 ## API endpoints
 
+Base URL for the live deployment: `https://fed-scrape-api.up.railway.app`.
+Interactive docs: `https://fed-scrape-api.up.railway.app/docs`.
+
 | Method | Path | Description |
 |---|---|---|
 | `GET` | `/health` | Health check (200 / 503) |
 | `GET` | `/rates/latest` | Most recent H.15 record (cached 1 h) |
+| `GET` | `/rates/types` | All rate-type slugs mapped to display names |
 | `GET` | `/rates/spread?rate_a=treasury_10y&rate_b=treasury_2y` | Yield spread (cached 1 h) |
 | `POST` | `/rates/refresh` | Trigger scrape + upsert, clears cache |
 | `GET` | `/rates/{rate_type}?limit=30` | Time series for one rate type (cached 1 h) |
+| `GET` | `/rates/{rate_type}/average?days=30` | Trailing-window average for one rate type |
 | `POST` | `/chat` | Conversational interface backed by Claude + rate tools |
+
+### `/chat` — the key endpoint
+
+This is the flagship GenAI feature: a conversational interface that
+answers natural-language questions about Fed rate data, backed by Claude
+with tool access to the same data this API serves (see
+[architecture.md](.claude/architecture.md) for how the tool-use loop
+works). The client sends the full conversation history on every request;
+the last message must have `role: "user"`.
+
+```bash
+curl -X POST https://fed-scrape-api.up.railway.app/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "messages": [
+      {"role": "user", "content": "What is the current Fed Funds rate, and how does it compare to the 10-year Treasury?"}
+    ]
+  }'
+```
+
+```json
+{
+  "message": "Here's the latest picture as of **July 23, 2026**:\n\n| Instrument | Rate |\n|---|---|\n| Federal Funds Rate | **3.63%** |\n| 10-Year Treasury | **4.71%** |\n| **Spread (10y − Fed Funds)** | **+1.08 pp** |\n\n### Key Takeaways:\n\n- **The yield curve is positively sloped** between the Fed Funds rate and the 10-year Treasury — a \"normal\" configuration where longer-duration debt commands a higher yield.\n- ...",
+  "tool_calls_made": 5
+}
+```
+
+Note the response `message` is markdown (tables, bold, headers) — render it
+accordingly rather than as plain text (`fedscrape-ui`'s Chat page uses
+`react-markdown` + `remark-gfm` for this, see
+[frontend.md](.claude/frontend.md)).
+
+`tool_calls_made` reports how many of the backend's data tools (rate
+lookups, averages, spreads) Claude used to answer — useful for surfacing
+"this answer is grounded in real data" in a UI (see
+`fedscrape-ui`'s Chat page, which shows this as a badge).
 
 ### Rate limits
 
