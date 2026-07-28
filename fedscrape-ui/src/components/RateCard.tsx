@@ -20,7 +20,7 @@ export function RateCard({
       className={[
         'cursor-pointer border transition-colors duration-200',
         isSelected
-          ? 'border-blue-600 bg-blue-600 shadow-lg shadow-blue-500/50'
+          ? 'border-blue-600 bg-blue-600 shadow-lg shadow-zinc-900/80'
           : 'border-border bg-card hover:border-blue-500',
       ].join(' ')}
     >
