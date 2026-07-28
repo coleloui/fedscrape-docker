@@ -20,15 +20,15 @@ export function RateCard({
       className={[
         'cursor-pointer border transition-colors duration-200',
         isSelected
-          ? 'border-blue-600 bg-blue-600 shadow-lg shadow-zinc-600/60'
-          : 'border-border bg-card hover:border-blue-500',
+          ? 'border-primary bg-primary shadow-lg shadow-card-selected-shadow'
+          : 'border-border bg-card hover:border-primary',
       ].join(' ')}
     >
       <CardHeader className='pb-2'>
         <CardTitle
           className={[
             'text-sm font-normal transition-colors duration-200',
-            isSelected ? 'text-white' : 'text-muted-foreground',
+            isSelected ? 'text-foreground' : 'text-muted-foreground',
           ].join(' ')}
         >
           {label}
@@ -36,17 +36,14 @@ export function RateCard({
       </CardHeader>
       <CardContent>
         <div
-          className={[
-            'font-mono text-2xl font-semibold transition-colors duration-200',
-            isSelected ? 'text-white' : 'text-foreground',
-          ].join(' ')}
+          className='font-mono text-2xl font-semibold text-foreground transition-colors duration-200'
         >
           {formatRate(value)}
         </div>
         <div
           className={[
             'mt-1 text-xs transition-colors duration-200',
-            isSelected ? 'text-blue-100' : 'text-muted-foreground',
+            isSelected ? 'text-card-selected-muted' : 'text-muted-foreground',
           ].join(' ')}
         >
           {formatDate(date)}

@@ -38,7 +38,7 @@ export function Navbar() {
           href='https://ko-fi.com/fedrate'
           target='_blank'
           rel='noopener noreferrer'
-          className='ml-auto whitespace-nowrap rounded-md border border-zinc-700 px-3 py-1.5 text-sm text-zinc-400 transition-colors duration-200 hover:border-blue-500 hover:text-white'
+          className='ml-auto whitespace-nowrap rounded-md border border-input px-3 py-1.5 text-sm text-muted-foreground transition-colors duration-200 hover:border-primary hover:text-foreground'
         >
           ☕<span className='hidden sm:inline'> Support</span>
         </a>
