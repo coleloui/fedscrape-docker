@@ -122,7 +122,9 @@ def scrape_latest() -> list[RateRecord]:
         record_data: dict = {"date": datetime.date.fromisoformat(str(row["date"]))}
         for col_header, field_name in SCRAPE_COLUMN_MAP.items():
             raw = row.get(col_header)
-            record_data[field_name] = None if (raw is None or raw == "n.a.") else str(raw)
+            record_data[field_name] = (
+                None if (raw is None or raw == "n.a.") else str(raw)
+            )
         records.append(RateRecord(**record_data))
 
     return records

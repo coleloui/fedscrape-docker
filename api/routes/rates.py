@@ -75,7 +75,9 @@ async def yield_spread(
             detail="Cannot compute spread — one or both rates are unavailable (n.a.).",
         )
 
-    result = SpreadResponse(date=record.date, rate_a=rate_a, rate_b=rate_b, spread=spread)
+    result = SpreadResponse(
+        date=record.date, rate_a=rate_a, rate_b=rate_b, spread=spread
+    )
     await cache_set(cache_key, result.model_dump(mode="json"))
     return result
 
@@ -99,7 +101,10 @@ _DURATION_SUFFIX = re.compile(r"^(\d+)([a-z])$")
 
 
 def slug_to_display(slug: str) -> str:
-    """Convert a rate-type slug to a human-readable label, e.g. treasury_10y -> Treasury 10Y."""
+    """Convert a rate-type slug to a human-readable label.
+
+    Example: treasury_10y -> Treasury 10Y.
+    """
     parts = []
     for part in slug.split("_"):
         duration_match = _DURATION_SUFFIX.match(part)
@@ -144,7 +149,9 @@ async def rate_average(
 async def rate_series(
     request: Request,
     rate_type: str,
-    limit: int = Query(30, ge=1, le=365, description="Number of recent records to return"),
+    limit: int = Query(
+        30, ge=1, le=365, description="Number of recent records to return"
+    ),
     session: AsyncSession = Depends(get_session),
 ):
     """Return a time series for a single rate type."""

@@ -10,13 +10,15 @@ from db.session import engine, init_db
 @pytest.fixture
 async def client():
     """Async HTTP client wired directly to the FastAPI app (no real server needed)."""
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as ac:
         yield ac
 
 
 @pytest_asyncio.fixture
 async def async_client():
-    """Async client with full DB lifecycle — creates tables on setup, drops on teardown."""
+    """Async client with full DB lifecycle — creates tables on setup, drops on teardown."""  # noqa: E501
     await init_db()
     async with AsyncClient(
         transport=ASGITransport(app=app),

@@ -51,7 +51,9 @@ def serve(
 
 @app.command()
 def scrape(
-    dry_run: bool = typer.Option(False, "--dry-run", help="Parse without writing to DB"),
+    dry_run: bool = typer.Option(
+        False, "--dry-run", help="Parse without writing to DB"
+    ),
 ) -> None:
     """
     Fetch the latest Fed H.15 release and upsert into the database.

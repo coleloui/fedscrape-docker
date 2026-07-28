@@ -16,7 +16,9 @@ def _s3_resource():
 
 def s3_available() -> bool:
     """Return True only when all S3 credentials are set."""
-    return all([settings.AWS_KEY, settings.AWS_SECRET, settings.AWS_REGION, settings.S3_BUCKET])
+    return all([
+        settings.AWS_KEY, settings.AWS_SECRET, settings.AWS_REGION, settings.S3_BUCKET
+    ])
 
 
 def upload_scrape_csv(path: str = "scrape/scrape.csv") -> None:
@@ -37,5 +39,7 @@ def upload_download_dir(src_dir: str = "download") -> None:
             series_name = os.path.basename(root)
             full_path = os.path.join(root, fname)
             with open(full_path, "rb") as fh:
-                s3.Object(settings.S3_BUCKET, f"data/{series_name}/{fname}").put(Body=fh)
+                s3.Object(
+                    settings.S3_BUCKET, f"data/{series_name}/{fname}"
+                ).put(Body=fh)
             print(f"S3 upload complete: {series_name}/{fname}")

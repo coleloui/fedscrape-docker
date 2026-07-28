@@ -74,7 +74,7 @@ async def list_tools() -> list[types.Tool]:
                     },
                     "limit": {
                         "type": "integer",
-                        "description": "Number of records to return (1–365, default 30).",
+                        "description": "Records to return (1-365, default 30).",
                         "default": 30,
                     },
                 },
@@ -93,7 +93,7 @@ async def list_tools() -> list[types.Tool]:
                     },
                     "days": {
                         "type": "integer",
-                        "description": "Number of recent records to average (default 30).",
+                        "description": "Recent records to average (default 30).",
                         "default": 30,
                     },
                 },
@@ -106,8 +106,10 @@ async def list_tools() -> list[types.Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "rate_a": {"type": "string", "description": "First rate type slug."},
-                    "rate_b": {"type": "string", "description": "Second rate type slug."},
+                    "rate_a": {"type": "string", "description": "First rate slug."},
+                    "rate_b": {
+                        "type": "string", "description": "Second rate type slug."
+                    },
                 },
                 "required": ["rate_a", "rate_b"],
             },
