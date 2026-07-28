@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python -c \"\nimport sys, json\ndata = json.load(sys.stdin)\nf = data.get('tool_input', {}).get('file_path', '')\nsep = chr(92)\nif f.endswith('.py') and '/tests/' not in f and (sep + 'tests' + sep) not in f:\n    print(json.dumps({'hookSpecificOutput': {'hookEventName': 'PostToolUse', 'additionalContext': 'Reminder: add or update tests in tests/ for the Python logic you just changed. Follow the patterns in .claude/testing.md.'}}))\n\""
+          }
+        ]
+      }
+    ]
+  }
+}
