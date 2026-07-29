@@ -18,6 +18,8 @@ class Settings(BaseSettings):
     GROQ_API_KEY: str = ""
     GROQ_MODEL: str = "llama-3.1-70b-versatile"
 
+    FRED_API_KEY: str = ""
+
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 

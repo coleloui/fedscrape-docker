@@ -103,74 +103,29 @@ def scrape(
         raise typer.Exit(code=exit_code)
 
 
-_BACKFILL_SERIES_FIELDS: dict[str, list[str]] = {
-    "federal_eff_funds": ["federal_funds"],
-    "commercial_paper_nonfinancial": [
-        "cp_nonfinancial_1m",
-        "cp_nonfinancial_2m",
-        "cp_nonfinancial_3m",
-    ],
-    "commercial_paper_financial": [
-        "cp_financial_1m",
-        "cp_financial_2m",
-        "cp_financial_3m",
-    ],
-    "bank_prime_loan": ["bank_prime_loan"],
-    "discount_window_primary_credit": ["discount_window_primary"],
-    "us_gov_securities_tresury_bills": [
-        "tbill_4w",
-        "tbill_3m",
-        "tbill_6m",
-        "tbill_1y",
-    ],
-    "maturities_nominal_9": [
-        "treasury_1m",
-        "treasury_3m",
-        "treasury_6m",
-        "treasury_1y",
-        "treasury_2y",
-        "treasury_3y",
-        "treasury_5y",
-        "treasury_7y",
-        "treasury_10y",
-        "treasury_20y",
-        "treasury_30y",
-    ],
-    "maturities_inflation_indexed": [
-        "tips_5y",
-        "tips_7y",
-        "tips_10y",
-        "tips_20y",
-        "tips_30y",
-    ],
-    "inflation_indexed_long_term": ["inflation_long_term"],
+# FRED series ID → RateRecord field name
+_FRED_SERIES: dict[str, str] = {
+    "DFF": "federal_funds",
+    "DGS2": "treasury_2y",
+    "DGS3": "treasury_3y",
+    "DGS5": "treasury_5y",
+    "DGS7": "treasury_7y",
+    "DGS10": "treasury_10y",
+    "DGS20": "treasury_20y",
+    "DGS30": "treasury_30y",
+    "DTB4WK": "tbill_4w",
+    "DTB3": "tbill_3m",
+    "DTB6": "tbill_6m",
+    "DTB1YR": "tbill_1y",
+    "DPRIME": "bank_prime_loan",
+    "DFII5": "tips_5y",
+    "DFII7": "tips_7y",
+    "DFII10": "tips_10y",
+    "DFII20": "tips_20y",
+    "DFII30": "tips_30y",
 }
 
-_FED_DOWNLOAD_URL = (
-    "https://www.federalreserve.gov/datadownload/Output.aspx"
-    "?rel=H15&series={series}&lastobs=&startdate={from_date}&enddate={to_date}"
-    "&filetype=csv&label=include&layout=seriescolumn"
-)
-
-_NA_VALUES = {"n.a.", "ND", "", "nan", "N/A"}
-
-
-def _csv_text_from_response(response: object) -> str:
-    """Return CSV text from response, unpacking ZIP if needed."""
-    import io
-    import zipfile
-
-    import requests as _req
-
-    r: _req.Response = response  # type: ignore[assignment]
-    content_type = r.headers.get("Content-Type", "")
-    if "zip" in content_type or r.content[:2] == b"PK":
-        with zipfile.ZipFile(io.BytesIO(r.content)) as zf:
-            names = zf.namelist()
-            csv_names = [n for n in names if n.endswith(".csv")]
-            target = csv_names[0] if csv_names else names[0]
-            return zf.read(target).decode("utf-8", errors="replace")
-    return r.text
+_FRED_BASE_URL = "https://api.stlouisfed.org/fred/series/observations"
 
 
 @app.command()
@@ -182,106 +137,73 @@ def backfill(
     ),
 ) -> None:
     """
-    Download historical Fed H.15 data for a date range and upsert into the database.
+    Download historical Fed rate data from FRED and upsert into the database.
+
+    Requires FRED_API_KEY to be set. Fields not available on FRED
+    (commercial paper, discount window, short Treasuries, inflation
+    long-term average) are left null and can be filled by fedscrape scrape.
 
     Exit codes:
         0 — success
         1 — download, parse, or DB error
     """
     import datetime
-    import io
-    import re
 
-    import pandas as pd
     import requests
 
     _setup_logging()
     logger = logging.getLogger("fedscrape.backfill")
 
     try:
-        start_date = datetime.date.fromisoformat(start)
-        end_date = datetime.date.fromisoformat(end)
+        datetime.date.fromisoformat(start)
+        datetime.date.fromisoformat(end)
     except ValueError as exc:
         logger.error("Invalid date format: %s", exc)
         raise typer.Exit(code=1)
 
-    from_param = start_date.strftime("%m/%d/%Y")
-    to_param = end_date.strftime("%m/%d/%Y")
+    from api.config import settings
 
-    from api.services.downloader import SERIES
-
-    date_pattern = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+    if not settings.FRED_API_KEY:
+        logger.error("FRED_API_KEY is not set.")
+        raise typer.Exit(code=1)
 
     # Accumulate {date -> {field: value}} across all series
     merged: dict[datetime.date, dict[str, str | None]] = {}
 
-    for series_name, series_id in SERIES.items():
-        fields = _BACKFILL_SERIES_FIELDS.get(series_name)
-        if not fields:
-            logger.warning("No field mapping for series %r — skipping.", series_name)
-            continue
-
-        url = _FED_DOWNLOAD_URL.format(
-            series=series_id, from_date=from_param, to_date=to_param
-        )
-        logger.info("Downloading %s...", series_name)
-
+    for series_id, field in _FRED_SERIES.items():
+        logger.info("Fetching FRED %s → %s...", series_id, field)
         try:
-            response = requests.get(url, timeout=60)
-            response.raise_for_status()
-        except requests.exceptions.RequestException as exc:
-            logger.error("Failed to download %s: %s", series_name, exc)
-            raise typer.Exit(code=1)
-
-        content_type = response.headers.get("Content-Type", "")
-        logger.info(
-            "%s — status=%s Content-Type=%r preview=%r",
-            series_name,
-            response.status_code,
-            content_type,
-            response.text[:500],
-        )
-
-        try:
-            csv_text = _csv_text_from_response(response)
-        except Exception as exc:
-            logger.error("Could not extract CSV from %s response: %s", series_name, exc)
-            raise typer.Exit(code=1)
-
-        try:
-            df = pd.read_csv(io.StringIO(csv_text), header=None, dtype=str)
-        except Exception as exc:
-            logger.error("pandas failed on %s: %s", series_name, exc)
-            raise typer.Exit(code=1)
-
-        df = df[df.iloc[:, 0].str.match(date_pattern, na=False)]
-
-        if df.empty:
-            logger.warning("No data rows for %s.", series_name)
-            continue
-
-        expected_cols = 1 + len(fields)
-        if df.shape[1] < expected_cols:
-            logger.warning(
-                "Series %s: expected %d columns, got %d — skipping.",
-                series_name,
-                expected_cols,
-                df.shape[1],
+            resp = requests.get(
+                _FRED_BASE_URL,
+                params={
+                    "series_id": series_id,
+                    "observation_start": start,
+                    "observation_end": end,
+                    "api_key": settings.FRED_API_KEY,
+                    "file_type": "json",
+                },
+                timeout=30,
             )
-            continue
+            resp.raise_for_status()
+        except requests.exceptions.RequestException as exc:
+            logger.error("Failed to fetch %s: %s", series_id, exc)
+            raise typer.Exit(code=1)
 
-        for _, row in df.iterrows():
+        observations = resp.json().get("observations", [])
+        count = 0
+        for obs in observations:
+            raw_date = obs.get("date", "")
+            raw_value = obs.get("value", "")
             try:
-                date = datetime.date.fromisoformat(str(row.iloc[0]).strip())
+                date = datetime.date.fromisoformat(raw_date)
             except ValueError:
                 continue
             if date not in merged:
                 merged[date] = {}
-            for i, field in enumerate(fields):
-                raw = str(row.iloc[i + 1]).strip()
-                merged[date][field] = None if raw in _NA_VALUES else raw
+            merged[date][field] = None if raw_value in {".", ""} else raw_value
+            count += 1
 
-        logger.info("Parsed %d rows for %s.", len(df), series_name)
+        logger.info("Parsed %d observations for %s.", count, series_id)
 
     if not merged:
         logger.warning("No records parsed.")
