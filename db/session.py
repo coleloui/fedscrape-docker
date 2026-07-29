@@ -5,7 +5,13 @@ from sqlmodel import SQLModel
 
 from api.config import settings
 
-engine = create_async_engine(settings.DATABASE_URL, echo=False, future=True)
+_database_url = (
+    settings.DATABASE_URL.replace("postgres://", "postgresql+asyncpg://", 1).replace(
+        "postgresql://", "postgresql+asyncpg://", 1
+    )
+)
+
+engine = create_async_engine(_database_url, echo=False, future=True)
 
 AsyncSessionLocal = async_sessionmaker(
     engine, class_=AsyncSession, expire_on_commit=False
