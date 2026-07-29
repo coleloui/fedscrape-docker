@@ -20,7 +20,7 @@
       "bash -c 'cd fedscrape-ui && npx tsc -b'"
     ],
     "*.py": [
-      "ruff check --fix"
+      "python -m ruff check --fix"
     ]
   }
 }
