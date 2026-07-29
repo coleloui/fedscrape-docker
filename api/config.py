@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     S3_BUCKET: str = ""
 
     GROQ_API_KEY: str = ""
-    GROQ_MODEL: str = "llama-3.1-70b-versatile"
+    GROQ_MODEL: str = "llama-3.3-70b-versatile"
 
     FRED_API_KEY: str = ""
 
