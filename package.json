@@ -11,7 +11,7 @@
   "lint-staged": {
     "fedscrape-ui/src/**/*.{js,jsx,ts,tsx}": [
       "npm --prefix fedscrape-ui exec prettier -- --write",
-      "npm --prefix fedscrape-ui exec eslint -- --fix"
+      "npm --prefix fedscrape-ui exec eslint -- --config fedscrape-ui/eslint.config.js --fix"
     ],
     "fedscrape-ui/**/*.{json,css,md}": [
       "npm --prefix fedscrape-ui exec prettier -- --write"

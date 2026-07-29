@@ -15,7 +15,7 @@ import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { SpreadChart } from '@/components/charts/SpreadChart'
 import { useLatestRates, useRateSeries, useSpread } from '@/hooks/useRates'
-import { parseRateValue } from '@/lib/formatters'
+import { formatDate, parseRateValue } from '@/lib/formatters'
 import type { RateResponse } from '@/types/rates'
 
 const MATURITIES: Array<{ key: keyof RateResponse; label: string }> = [
@@ -50,8 +50,7 @@ function SpreadBadge() {
         }
       >
         {spread.spread >= 0 ? '+' : ''}
-        {spread.spread.toFixed(2)}%
-        {isInverted ? ' (inverted)' : ''}
+        {spread.spread.toFixed(2)}%{isInverted ? ' (inverted)' : ''}
       </Badge>
     </div>
   )
@@ -150,9 +149,27 @@ function SpreadHistoryChart() {
       .reverse()
   }, [tenYear, twoYear])
 
+  const title = useMemo(() => {
+    if (data.length === 0) return '10Y–2Y Spread History'
+    const first = formatDate(data[0].date)
+    const last = formatDate(data[data.length - 1].date)
+    return `10Y–2Y Spread History (${first} – ${last})`
+  }, [data])
+
   if (tenLoading || twoLoading) return <Skeleton className='h-72 rounded-lg' />
 
-  return <SpreadChart data={data} />
+  return (
+    <Card className='border-border bg-card'>
+      <CardHeader>
+        <CardTitle className='text-base font-normal text-muted-foreground'>
+          {title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <SpreadChart data={data} />
+      </CardContent>
+    </Card>
+  )
 }
 
 export function YieldCurve() {
@@ -171,16 +188,7 @@ export function YieldCurve() {
         </CardContent>
       </Card>
 
-      <Card className='border-border bg-card'>
-        <CardHeader>
-          <CardTitle className='text-base font-normal text-muted-foreground'>
-            10Y–2Y Spread History (1 Year)
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <SpreadHistoryChart />
-        </CardContent>
-      </Card>
+      <SpreadHistoryChart />
     </div>
   )
 }
