@@ -14,41 +14,9 @@ logger = logging.getLogger(__name__)
 
 FED_H15_URL = "https://www.federalreserve.gov/releases/h15/"
 
-# Column names in the order they appear in the H.15 HTML table
-# (skipped rows are handled separately below).
-_TABLE_COLUMNS = [
-    "date",
-    "Federal Funds",
-    "Commercial Paper - Nonfinancial - 1 Month",
-    "Commercial Paper - Nonfinancial - 2 Month",
-    "Commercial Paper - Nonfinancial - 3 Month",
-    "Commercial Paper - Financial - 1 Month",
-    "Commercial Paper - Financial - 2 Month",
-    "Commercial Paper - Financial - 3 Month",
-    "Bank Prime Loan",
-    "Discount Window Primary Credit",
-    "U.S. Gov - Bills - 4 week",
-    "U.S. Gov - Bills - 3 month",
-    "U.S. Gov - Bills - 6 month",
-    "U.S. Gov - Bills - 1 year",
-    "U.S. Gov - Maturities - Nominal 9 - 1 month",
-    "U.S. Gov - Maturities - Nominal 9 - 3 month",
-    "U.S. Gov - Maturities - Nominal 9 - 6 month",
-    "U.S. Gov - Maturities - Nominal 9 - 1 year",
-    "U.S. Gov - Maturities - Nominal 9 - 2 year",
-    "U.S. Gov - Maturities - Nominal 9 - 3 year",
-    "U.S. Gov - Maturities - Nominal 9 - 5 year",
-    "U.S. Gov - Maturities - Nominal 9 - 7 year",
-    "U.S. Gov - Maturities - Nominal 9 - 10 year",
-    "U.S. Gov - Maturities - Nominal 9 - 20 year",
-    "U.S. Gov - Maturities - Nominal 9 - 30 year",
-    "U.S. Gov - Maturities - Inflation indexed - 5 year",
-    "U.S. Gov - Maturities - Inflation indexed - 7 year",
-    "U.S. Gov - Maturities - Inflation indexed - 10 year",
-    "U.S. Gov - Maturities - Inflation indexed - 20 year",
-    "U.S. Gov - Maturities - Inflation indexed - 30 year",
-    "U.S. Gov - Inflation-Indexed Long-Term Average",
-]
+# Derived from SCRAPE_COLUMN_MAP (the single source of truth in db/models.py)
+# so it can never silently drift out of sync with the field definitions.
+_TABLE_COLUMNS = ["date"] + list(SCRAPE_COLUMN_MAP.keys())
 
 # Row indices to skip — they contain section headers, not data.
 _SKIP_ROWS = {2, 3, 7, 13, 14, 19, 20, 32}
