@@ -148,11 +148,29 @@ _BACKFILL_SERIES_FIELDS: dict[str, list[str]] = {
 
 _FED_DOWNLOAD_URL = (
     "https://www.federalreserve.gov/datadownload/Output.aspx"
-    "?rel=H15&series={series}&lastobs=&from={from_date}&to={to_date}"
-    "&filetype=csv&label=omit&layout=seriescolumn"
+    "?rel=H15&series={series}&lastobs=&startdate={from_date}&enddate={to_date}"
+    "&filetype=csv&label=include&layout=seriescolumn"
 )
 
 _NA_VALUES = {"n.a.", "ND", "", "nan", "N/A"}
+
+
+def _csv_text_from_response(response: object) -> str:
+    """Return CSV text from response, unpacking ZIP if needed."""
+    import io
+    import zipfile
+
+    import requests as _req
+
+    r: _req.Response = response  # type: ignore[assignment]
+    content_type = r.headers.get("Content-Type", "")
+    if "zip" in content_type or r.content[:2] == b"PK":
+        with zipfile.ZipFile(io.BytesIO(r.content)) as zf:
+            names = zf.namelist()
+            csv_names = [n for n in names if n.endswith(".csv")]
+            target = csv_names[0] if csv_names else names[0]
+            return zf.read(target).decode("utf-8", errors="replace")
+    return r.text
 
 
 @app.command()
@@ -215,7 +233,27 @@ def backfill(
             logger.error("Failed to download %s: %s", series_name, exc)
             raise typer.Exit(code=1)
 
-        df = pd.read_csv(io.StringIO(response.text), header=None, dtype=str)
+        content_type = response.headers.get("Content-Type", "")
+        logger.info(
+            "%s — status=%s Content-Type=%r preview=%r",
+            series_name,
+            response.status_code,
+            content_type,
+            response.text[:500],
+        )
+
+        try:
+            csv_text = _csv_text_from_response(response)
+        except Exception as exc:
+            logger.error("Could not extract CSV from %s response: %s", series_name, exc)
+            raise typer.Exit(code=1)
+
+        try:
+            df = pd.read_csv(io.StringIO(csv_text), header=None, dtype=str)
+        except Exception as exc:
+            logger.error("pandas failed on %s: %s", series_name, exc)
+            raise typer.Exit(code=1)
+
         df = df[df.iloc[:, 0].str.match(date_pattern, na=False)]
 
         if df.empty:
