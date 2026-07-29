@@ -106,6 +106,7 @@ def scrape(
 # FRED series ID → RateRecord field name
 _FRED_SERIES: dict[str, str] = {
     "DFF": "federal_funds",
+    "DGS1": "treasury_1y",
     "DGS2": "treasury_2y",
     "DGS3": "treasury_3y",
     "DGS5": "treasury_5y",
