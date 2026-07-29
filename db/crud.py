@@ -26,8 +26,12 @@ async def upsert_records(session: AsyncSession, records: list[RateRecord]) -> in
 
 
 async def get_latest(session: AsyncSession) -> Optional[RateRecord]:
+    """Return the most recent record where treasury_10y is populated."""
     result = await session.execute(
-        select(RateRecord).order_by(desc(RateRecord.date)).limit(1)
+        select(RateRecord)
+        .where(RateRecord.treasury_10y.isnot(None))
+        .order_by(desc(RateRecord.date))
+        .limit(1)
     )
     return result.scalar_one_or_none()
 

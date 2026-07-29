@@ -1,6 +1,7 @@
 """Port of scrape.py — parses the Fed H.15 HTML table into RateRecord objects."""
 
 import datetime
+import logging
 import unicodedata
 
 import pandas as pd
@@ -8,6 +9,8 @@ import requests
 from bs4 import BeautifulSoup
 
 from db.models import SCRAPE_COLUMN_MAP, RateRecord
+
+logger = logging.getLogger(__name__)
 
 FED_H15_URL = "https://www.federalreserve.gov/releases/h15/"
 
@@ -115,7 +118,15 @@ def scrape_latest() -> list[RateRecord]:
     if table is None:
         raise ValueError("Could not locate #h15table on the Fed H.15 page.")
 
-    df = _build_dataframe(table.findChildren("tr"))
+    table_rows = table.findChildren("tr")
+    logger.debug("H.15 table has %d raw <tr> rows.", len(table_rows))
+
+    df = _build_dataframe(table_rows)
+    logger.debug(
+        "DataFrame shape after parsing: %s. Columns: %s",
+        df.shape,
+        list(df.columns),
+    )
 
     records: list[RateRecord] = []
     for _, row in df.iterrows():
@@ -126,5 +137,15 @@ def scrape_latest() -> list[RateRecord]:
                 None if (raw is None or raw == "n.a.") else str(raw)
             )
         records.append(RateRecord(**record_data))
+
+    for rec in records[:3]:
+        logger.info(
+            "Parsed record sample: date=%s federal_funds=%s "
+            "treasury_10y=%s tbill_3m=%s",
+            rec.date,
+            rec.federal_funds,
+            rec.treasury_10y,
+            rec.tbill_3m,
+        )
 
     return records
