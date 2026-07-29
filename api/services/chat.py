@@ -25,7 +25,12 @@ Rules:
 - If asked about future rates, state plainly you only have historical data.
 
 Available data: Fed H.15 — Fed Funds, Treasury bills, Treasury notes/bonds \
-(nominal and TIPS), commercial paper, bank prime loan rate.\
+(nominal and TIPS), commercial paper, bank prime loan rate.
+
+When answering questions, provide thorough analysis with context. Include \
+relevant numbers, historical context where helpful, and explain what the data \
+means in plain English. Aim for responses that are genuinely informative, not \
+just a single sentence summary.\
 """
 
 # OpenAI/Groq tool format

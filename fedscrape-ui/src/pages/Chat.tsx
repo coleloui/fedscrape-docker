@@ -12,7 +12,7 @@ import type { Message } from '@/types/rates'
 const WELCOME_MESSAGE: Message = {
   role: 'assistant',
   content:
-    'Welcome to FedScrape. I can answer questions about Federal Reserve ' +
+    'Welcome to FedRate. I can answer questions about Federal Reserve ' +
     'H.15 interest rate data including current rates, historical trends, ' +
     'yield curve analysis, and rate comparisons. Please note: all ' +
     'information is for educational purposes only and does not constitute ' +
@@ -45,10 +45,7 @@ export function Chat() {
 
   function sendMessage(content: string) {
     if (!content.trim() || mutation.isPending) return
-    const nextMessages: Message[] = [
-      ...messages,
-      { role: 'user', content },
-    ]
+    const nextMessages: Message[] = [...messages, { role: 'user', content }]
     setMessages(nextMessages)
     setInput('')
 
