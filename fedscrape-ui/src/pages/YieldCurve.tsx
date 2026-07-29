@@ -67,10 +67,10 @@ function CurveShapeChart() {
 
   const data = useMemo(() => {
     if (!latest) return []
-    return MATURITIES.map(m => ({
-      maturity: m.label,
-      value: parseRateValue(latest[m.key] as string | null | undefined),
-    }))
+    return MATURITIES.flatMap(m => {
+      const value = parseRateValue(latest[m.key] as string | null | undefined)
+      return value !== null ? [{ maturity: m.label, value }] : []
+    })
   }, [latest])
 
   if (isLoading || !latest) return <Skeleton className='h-72 rounded-lg' />

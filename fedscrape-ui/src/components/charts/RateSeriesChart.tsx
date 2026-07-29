@@ -48,34 +48,45 @@ export function RateSeriesChart({ data }: { data: SeriesPoint[] }) {
     .sort((a, b) => a.date.localeCompare(b.date))
 
   return (
-    <ResponsiveContainer width='100%' height={300}>
-      <LineChart data={chartData} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
-        <CartesianGrid strokeDasharray='3 3' stroke='var(--color-chart-grid)' />
-        <XAxis
-          dataKey='date'
-          tickFormatter={value => formatDate(value)}
-          stroke='var(--color-chart-axis)'
-          fontSize={12}
-          tickLine={false}
-          interval={Math.floor(chartData.length / 5)}
-        />
-        <YAxis
-          stroke='var(--color-chart-axis)'
-          fontSize={12}
-          tickLine={false}
-          domain={['auto', 'auto']}
-          tickFormatter={value => `${value}%`}
-        />
-        <Tooltip content={<TooltipContent />} />
-        <Line
-          type='monotone'
-          dataKey='value'
-          stroke='var(--color-chart-line)'
-          strokeWidth={2}
-          dot={false}
-          connectNulls={false}
-        />
-      </LineChart>
-    </ResponsiveContainer>
+    <div>
+      <ResponsiveContainer width='100%' height={300}>
+        <LineChart
+          data={chartData}
+          margin={{ top: 8, right: 16, left: 0, bottom: 0 }}
+        >
+          <CartesianGrid
+            strokeDasharray='3 3'
+            stroke='var(--color-chart-grid)'
+          />
+          <XAxis
+            dataKey='date'
+            tickFormatter={value => formatDate(value)}
+            stroke='var(--color-chart-axis)'
+            fontSize={12}
+            tickLine={false}
+            interval={Math.floor(chartData.length / 5)}
+          />
+          <YAxis
+            stroke='var(--color-chart-axis)'
+            fontSize={12}
+            tickLine={false}
+            domain={['auto', 'auto']}
+            tickFormatter={value => `${value}%`}
+          />
+          <Tooltip content={<TooltipContent />} />
+          <Line
+            type='monotone'
+            dataKey='value'
+            stroke='var(--color-chart-line)'
+            strokeWidth={2}
+            dot={false}
+            connectNulls={false}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+      <p className='mt-2 text-xs text-zinc-500'>
+        Gaps reflect weekends and market holidays when rates are not published.
+      </p>
+    </div>
   )
 }
