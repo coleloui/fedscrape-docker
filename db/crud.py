@@ -26,10 +26,12 @@ async def upsert_records(session: AsyncSession, records: list[RateRecord]) -> in
 
 
 async def get_latest(session: AsyncSession) -> Optional[RateRecord]:
-    """Return the most recent record where treasury_10y is populated."""
+    """Return the most recent record where all core Treasury rates are present."""
     result = await session.execute(
         select(RateRecord)
         .where(RateRecord.treasury_10y.isnot(None))
+        .where(RateRecord.treasury_2y.isnot(None))
+        .where(RateRecord.treasury_1y.isnot(None))
         .order_by(desc(RateRecord.date))
         .limit(1)
     )

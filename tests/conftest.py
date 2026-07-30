@@ -1,3 +1,7 @@
+import os
+
+os.environ.setdefault("APP_ENV", "test")
+
 import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
@@ -19,6 +23,9 @@ async def client():
 @pytest_asyncio.fixture
 async def async_client():
     """Async client with full DB lifecycle — creates tables on setup, drops on teardown."""  # noqa: E501
+    # Dispose the engine pool so connections from a prior test's event loop
+    # are not reused — each test runs in its own asyncio event loop.
+    await engine.dispose()
     await init_db()
     async with AsyncClient(
         transport=ASGITransport(app=app),
@@ -27,3 +34,4 @@ async def async_client():
         yield ac
     async with engine.begin() as conn:
         await conn.run_sync(SQLModel.metadata.drop_all)
+    await engine.dispose()
