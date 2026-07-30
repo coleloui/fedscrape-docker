@@ -1,3 +1,7 @@
+import os
+
+os.environ.setdefault("APP_ENV", "test")
+
 import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
