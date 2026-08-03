@@ -45,6 +45,25 @@ async def get_by_date(session: AsyncSession, d: datetime.date) -> Optional[RateR
     return result.scalar_one_or_none()
 
 
+async def get_snapshot_for_date(
+    session: AsyncSession, target_date: datetime.date
+) -> Optional[RateRecord]:
+    """Return the closest full record on or before `target_date`.
+
+    Only considers records with a non-null `treasury_10y`, matching
+    `get_latest`'s definition of a "complete" record — this is used for
+    yield-curve snapshots, which need every maturity populated.
+    """
+    result = await session.execute(
+        select(RateRecord)
+        .where(RateRecord.date <= target_date)
+        .where(RateRecord.treasury_10y.isnot(None))
+        .order_by(desc(RateRecord.date))
+        .limit(1)
+    )
+    return result.scalar_one_or_none()
+
+
 async def get_series(
     session: AsyncSession, rate_type: str, limit: int = 30
 ) -> list[dict]:
