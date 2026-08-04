@@ -2,6 +2,7 @@ import { Area, AreaChart, ResponsiveContainer } from 'recharts'
 import { useLatestRates, useRateSeries } from '@/hooks/useRates'
 import { formatDate, formatRate, parseRateValue } from '@/lib/formatters'
 import { computeSpread, type RateDataPoint } from '@/lib/rateUtils'
+import { Badge } from '@/components/ui/badge'
 import type { RateSeriesEntry } from '@/types/rates'
 
 function toSparklineData(data: RateSeriesEntry[] | undefined): RateDataPoint[] {
@@ -54,17 +55,18 @@ function RateCard({
       <div className='flex items-center justify-between gap-2'>
         <h3 className='text-xs font-normal text-[var(--text-secondary)]'>{label}</h3>
         {badge && (
-          <span
-            className='rounded-full px-2 py-0.5 text-[10px] font-medium'
+          <Badge
+            variant='secondary'
+            className='text-[10px] font-medium'
             style={{
               color: badge.positive ? 'var(--accent-green)' : 'var(--accent-red)',
               backgroundColor: badge.positive
-                ? 'rgba(34, 197, 94, 0.12)'
-                : 'rgba(239, 68, 68, 0.12)',
+                ? 'var(--accent-green-dim)'
+                : 'var(--accent-red-dim)',
             }}
           >
             {badge.text}
-          </span>
+          </Badge>
         )}
       </div>
       <p className='m-0 font-mono text-2xl font-semibold text-[var(--text-primary)]'>

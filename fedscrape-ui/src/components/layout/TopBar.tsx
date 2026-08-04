@@ -26,7 +26,7 @@ export function TopBar() {
           href='https://ko-fi.com/fedrate'
           target='_blank'
           rel='noopener noreferrer'
-          className='ml-auto whitespace-nowrap rounded-md border border-white/10 px-3 py-1.5 text-sm text-[var(--text-secondary)] transition-colors duration-200 hover:border-[var(--accent-blue)] hover:text-[var(--text-primary)]'
+          className='ml-auto whitespace-nowrap rounded-md border border-[var(--border-subtle)] px-3 py-1.5 text-sm text-[var(--text-secondary)] transition-colors duration-200 hover:border-[var(--accent-blue)] hover:text-[var(--text-primary)]'
         >
           ☕<span className='hidden sm:inline'> Support</span>
         </a>
