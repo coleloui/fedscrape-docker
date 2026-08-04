@@ -11,10 +11,13 @@ function toSparklineData(data: RateSeriesEntry[] | undefined): RateDataPoint[] {
     .sort((a, b) => a.date.localeCompare(b.date))
 }
 
+// Decorative — the same 30-day trend is available as real numbers via the
+// Historical Timeline panel, so this tiny chart is hidden from assistive
+// tech rather than given its own accessible summary.
 function MiniSparkline({ data }: { data: RateDataPoint[] }) {
-  if (data.length === 0) return <div className='h-10' />
+  if (data.length === 0) return <div className='h-10' aria-hidden='true' />
   return (
-    <div className='h-10'>
+    <div className='h-10' aria-hidden='true'>
       <ResponsiveContainer width='100%' height='100%'>
         <AreaChart data={data} margin={{ top: 2, right: 0, bottom: 0, left: 0 }}>
           <Area
@@ -49,7 +52,7 @@ function RateCard({
   return (
     <div className='glass-panel flex flex-col gap-2 p-4'>
       <div className='flex items-center justify-between gap-2'>
-        <span className='text-xs text-[var(--text-secondary)]'>{label}</span>
+        <h3 className='text-xs font-normal text-[var(--text-secondary)]'>{label}</h3>
         {badge && (
           <span
             className='rounded-full px-2 py-0.5 text-[10px] font-medium'
@@ -64,12 +67,12 @@ function RateCard({
           </span>
         )}
       </div>
-      <div className='font-mono text-2xl font-semibold text-[var(--text-primary)]'>
+      <p className='m-0 font-mono text-2xl font-semibold text-[var(--text-primary)]'>
         {formatRate(value)}
-      </div>
-      <div className='text-xs text-[var(--text-muted)]'>
+      </p>
+      <p className='m-0 text-xs text-[var(--text-muted)]'>
         {date ? formatDate(date) : '—'}
-      </div>
+      </p>
       <MiniSparkline data={sparkline} />
     </div>
   )
@@ -98,51 +101,56 @@ export function RateCardsRow() {
       : null
 
   return (
-    <div className='grid grid-cols-2 gap-3 lg:grid-cols-6'>
-      <RateCard
-        label='Federal Funds Rate'
-        value={parseRateValue(latest?.federal_funds)}
-        date={latest?.date}
-        sparkline={toSparklineData(ffr.data?.data)}
-      />
-      <RateCard
-        label='2-Year Treasury'
-        value={parseRateValue(latest?.treasury_2y)}
-        date={latest?.date}
-        sparkline={toSparklineData(y2.data?.data)}
-      />
-      <RateCard
-        label='10-Year Treasury'
-        value={parseRateValue(latest?.treasury_10y)}
-        date={latest?.date}
-        sparkline={toSparklineData(y10.data?.data)}
-      />
-      <RateCard
-        label='30-Year Treasury'
-        value={parseRateValue(latest?.treasury_30y)}
-        date={latest?.date}
-        sparkline={toSparklineData(y30.data?.data)}
-      />
-      <RateCard
-        label='Bank Prime Loan'
-        value={parseRateValue(latest?.bank_prime_loan)}
-        date={latest?.date}
-        sparkline={toSparklineData(prime.data?.data)}
-      />
-      <RateCard
-        label='10Y-2Y Spread'
-        value={spreadValue}
-        date={latest?.date}
-        sparkline={spreadSparkline}
-        badge={
-          spreadValue != null
-            ? {
-                text: spreadValue >= 0 ? 'Normal' : 'Inverted',
-                positive: spreadValue >= 0,
-              }
-            : undefined
-        }
-      />
-    </div>
+    <section aria-labelledby='rate-cards-heading'>
+      <h2 id='rate-cards-heading' className='sr-only'>
+        Current Rates
+      </h2>
+      <div className='grid grid-cols-2 gap-3 lg:grid-cols-6'>
+        <RateCard
+          label='Federal Funds Rate'
+          value={parseRateValue(latest?.federal_funds)}
+          date={latest?.date}
+          sparkline={toSparklineData(ffr.data?.data)}
+        />
+        <RateCard
+          label='2-Year Treasury'
+          value={parseRateValue(latest?.treasury_2y)}
+          date={latest?.date}
+          sparkline={toSparklineData(y2.data?.data)}
+        />
+        <RateCard
+          label='10-Year Treasury'
+          value={parseRateValue(latest?.treasury_10y)}
+          date={latest?.date}
+          sparkline={toSparklineData(y10.data?.data)}
+        />
+        <RateCard
+          label='30-Year Treasury'
+          value={parseRateValue(latest?.treasury_30y)}
+          date={latest?.date}
+          sparkline={toSparklineData(y30.data?.data)}
+        />
+        <RateCard
+          label='Bank Prime Loan'
+          value={parseRateValue(latest?.bank_prime_loan)}
+          date={latest?.date}
+          sparkline={toSparklineData(prime.data?.data)}
+        />
+        <RateCard
+          label='10Y-2Y Spread'
+          value={spreadValue}
+          date={latest?.date}
+          sparkline={spreadSparkline}
+          badge={
+            spreadValue != null
+              ? {
+                  text: spreadValue >= 0 ? 'Normal' : 'Inverted',
+                  positive: spreadValue >= 0,
+                }
+              : undefined
+          }
+        />
+      </div>
+    </section>
   )
 }

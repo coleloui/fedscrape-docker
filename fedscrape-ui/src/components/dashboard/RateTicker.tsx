@@ -72,7 +72,13 @@ export function RateTicker() {
   )
 
   return (
-    <div className='fixed bottom-0 z-30 hidden h-9 w-full items-center overflow-hidden border-t border-white/5 bg-zinc-900 lg:flex'>
+    // Decorative restatement of values already exposed accessibly in
+    // RateCardsRow's <dl> — hidden from assistive tech so a screen reader
+    // doesn't announce a constantly-scrolling duplicate of the same data.
+    <div
+      aria-hidden='true'
+      className='fixed bottom-0 z-30 hidden h-9 w-full items-center overflow-hidden border-t border-white/5 bg-zinc-900 lg:flex'
+    >
       <div className='ticker-track flex w-max'>
         {track('a')}
         {track('b')}

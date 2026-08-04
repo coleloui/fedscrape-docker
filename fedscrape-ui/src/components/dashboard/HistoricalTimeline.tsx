@@ -150,15 +150,19 @@ export function HistoricalTimeline() {
   })
 
   return (
-    <div className='glass-panel p-4'>
+    <section aria-labelledby='timeline-heading' className='glass-panel p-4'>
       <div className='mb-2 flex flex-wrap items-center justify-between gap-2'>
-        <h2 className='text-sm font-medium text-[var(--text-primary)]'>
+        <h2 id='timeline-heading' className='text-sm font-medium text-[var(--text-primary)]'>
           Historical Timeline
         </h2>
-        <div className='flex gap-1'>
+        <div role='tablist' aria-label='Time range' className='flex gap-1'>
           {RANGE_TABS.map(tab => (
             <button
               key={tab}
+              id={`timeline-tab-${tab}`}
+              role='tab'
+              aria-selected={range === tab}
+              aria-controls='timeline-panel'
               onClick={() => setRange(tab)}
               className={`rounded-full px-3 py-1 text-xs transition-colors duration-200 ${
                 range === tab
@@ -172,31 +176,41 @@ export function HistoricalTimeline() {
         </div>
       </div>
 
-      <ResponsiveContainer width='100%' height={320}>
-        <LineChart data={data} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
-          <CartesianGrid {...GRID_STYLE} />
-          <XAxis dataKey='date' tickFormatter={formatDate} {...AXIS_STYLE} />
-          <YAxis tickFormatter={value => `${value}%`} {...AXIS_STYLE} />
-          <Tooltip content={<TimelineTooltip />} cursor={{ stroke: 'var(--chart-grid)' }} />
-          <Legend
-            wrapperStyle={{ fontSize: 12, color: 'var(--text-secondary)' }}
-            formatter={(value: string) =>
-              RATE_LINES.find(l => l.key === value)?.label ?? value
-            }
-          />
-          {RATE_LINES.map(({ key, color }) => (
-            <Line
-              key={key}
-              type='monotone'
-              dataKey={key}
-              stroke={color}
-              strokeWidth={1.75}
-              dot={false}
-              connectNulls={false}
+      <div
+        id='timeline-panel'
+        role='tabpanel'
+        aria-labelledby={`timeline-tab-${range}`}
+      >
+        <ResponsiveContainer width='100%' height={320}>
+          <LineChart
+            data={data}
+            margin={{ top: 8, right: 16, bottom: 0, left: 0 }}
+            accessibilityLayer
+          >
+            <CartesianGrid {...GRID_STYLE} />
+            <XAxis dataKey='date' tickFormatter={formatDate} {...AXIS_STYLE} />
+            <YAxis tickFormatter={value => `${value}%`} {...AXIS_STYLE} />
+            <Tooltip content={<TimelineTooltip />} cursor={{ stroke: 'var(--chart-grid)' }} />
+            <Legend
+              wrapperStyle={{ fontSize: 12, color: 'var(--text-secondary)' }}
+              formatter={(value: string) =>
+                RATE_LINES.find(l => l.key === value)?.label ?? value
+              }
             />
-          ))}
-        </LineChart>
-      </ResponsiveContainer>
-    </div>
+            {RATE_LINES.map(({ key, color }) => (
+              <Line
+                key={key}
+                type='monotone'
+                dataKey={key}
+                stroke={color}
+                strokeWidth={1.75}
+                dot={false}
+                connectNulls={false}
+              />
+            ))}
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+    </section>
   )
 }

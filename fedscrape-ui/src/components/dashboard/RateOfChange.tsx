@@ -59,8 +59,8 @@ export function RateOfChange() {
   ]
 
   return (
-    <div className='glass-panel p-4'>
-      <h2 className='mb-2 text-sm font-medium text-[var(--text-primary)]'>
+    <section aria-labelledby='change-heading' className='glass-panel p-4'>
+      <h2 id='change-heading' className='mb-2 text-sm font-medium text-[var(--text-primary)]'>
         30-Day Rate Change
       </h2>
       <ResponsiveContainer width='100%' height={220}>
@@ -68,6 +68,7 @@ export function RateOfChange() {
           data={bars}
           layout='vertical'
           margin={{ top: 8, right: 24, bottom: 8, left: 8 }}
+          accessibilityLayer
         >
           <XAxis
             type='number'
@@ -129,6 +130,6 @@ export function RateOfChange() {
           </Bar>
         </BarChart>
       </ResponsiveContainer>
-    </div>
+    </section>
   )
 }
