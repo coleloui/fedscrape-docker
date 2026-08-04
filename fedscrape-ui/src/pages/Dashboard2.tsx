@@ -1,6 +1,8 @@
 import { TopBar } from '@/components/layout/TopBar'
 import { RateCardsRow } from '@/components/dashboard/RateCardsRow'
 import { RateTicker } from '@/components/dashboard/RateTicker'
+import { HistoricalTimeline } from '@/components/dashboard/HistoricalTimeline'
+import { RateOfChange } from '@/components/dashboard/RateOfChange'
 
 function Placeholder({ title, className = '' }: { title: string; className?: string }) {
   return (
@@ -22,8 +24,8 @@ export function Dashboard2() {
         <div className='mt-4 grid grid-cols-1 gap-4 lg:grid-cols-[65%_1fr]'>
           <div className='flex flex-col gap-4'>
             <Placeholder title='Yield Curve Snapshot' />
-            <Placeholder title='Historical Timeline' className='min-h-80' />
-            <Placeholder title='30-Day Rate Change' />
+            <HistoricalTimeline />
+            <RateOfChange />
             <Placeholder title='Yield Curve Over Time' />
           </div>
 
