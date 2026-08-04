@@ -64,7 +64,7 @@ export function ChatModal({
       role='dialog'
       aria-modal='true'
       aria-labelledby='chat-modal-heading'
-      className='fixed inset-0 z-50 flex flex-col bg-[var(--bg-base)] lg:hidden'
+      className='fixed inset-0 z-50 flex animate-in flex-col slide-in-from-bottom bg-[var(--bg-base)] duration-300 lg:hidden'
     >
       <div className='flex items-center justify-between border-b border-[var(--border-subtle)] px-4 py-3'>
         <div className='flex items-center gap-2'>
