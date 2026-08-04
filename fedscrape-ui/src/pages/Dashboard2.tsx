@@ -3,6 +3,8 @@ import { RateCardsRow } from '@/components/dashboard/RateCardsRow'
 import { RateTicker } from '@/components/dashboard/RateTicker'
 import { HistoricalTimeline } from '@/components/dashboard/HistoricalTimeline'
 import { RateOfChange } from '@/components/dashboard/RateOfChange'
+import { YieldCurveSnapshot } from '@/components/dashboard/YieldCurveSnapshot'
+import { YieldCurveOverTime } from '@/components/dashboard/YieldCurveOverTime'
 
 function Placeholder({ title, className = '' }: { title: string; className?: string }) {
   return (
@@ -23,10 +25,10 @@ export function Dashboard2() {
         {/* Main content: left column + right (chat) column */}
         <div className='mt-4 grid grid-cols-1 gap-4 lg:grid-cols-[65%_1fr]'>
           <div className='flex flex-col gap-4'>
-            <Placeholder title='Yield Curve Snapshot' />
+            <YieldCurveSnapshot />
             <HistoricalTimeline />
             <RateOfChange />
-            <Placeholder title='Yield Curve Over Time' />
+            <YieldCurveOverTime />
           </div>
 
           <div className='hidden lg:block'>
