@@ -32,9 +32,13 @@ const MATURITIES: Maturity[] = [
   { label: '30Y', field: 'treasury_30y' },
 ]
 
-const INVERTED_COLOR = '#f87171' // red-400
-const SHORT_END_COLOR = [96, 165, 250] as const // blue-400
-const LONG_END_COLOR = [34, 211, 238] as const // cyan-400
+const INVERTED_COLOR = 'var(--chart-curve-inverted)'
+
+// Recharts needs numeric RGB channels to interpolate a per-bar gradient —
+// these mirror --chart-curve-short / --chart-curve-long in glass.css
+// (the theme file is still the source of truth for the actual hex values).
+const SHORT_END_COLOR = [96, 165, 250] as const // --chart-curve-short (blue-400)
+const LONG_END_COLOR = [34, 211, 238] as const // --chart-curve-long (cyan-400)
 
 function lerpColor(from: readonly number[], to: readonly number[], t: number): string {
   const [r, g, b] = from.map((channel, i) => Math.round(channel + (to[i] - channel) * t))
@@ -76,7 +80,7 @@ export function YieldCurveSnapshot() {
                 yield: number
               }
               return (
-                <div className='rounded-md border border-white/10 bg-zinc-900 px-3 py-2 text-xs shadow-lg'>
+                <div className='rounded-md border border-[var(--border-subtle)] bg-[var(--bg-elevated)] px-3 py-2 text-xs shadow-lg'>
                   <div className='text-[var(--text-secondary)]'>{label}</div>
                   <div className='font-mono text-[var(--text-primary)]'>
                     {yieldValue.toFixed(2)}%
