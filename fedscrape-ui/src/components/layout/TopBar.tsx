@@ -4,16 +4,19 @@ export function TopBar() {
   return (
     <header className='glass-panel sticky top-0 z-40 rounded-none border-x-0 border-t-0'>
       <div className='mx-auto flex max-w-[1600px] items-center gap-4 px-4 py-3'>
-        <span className='font-mono text-sm font-semibold text-[var(--text-primary)]'>
+        <h1 className='font-mono text-sm font-semibold text-[var(--text-primary)]'>
           FedRate
-        </span>
+        </h1>
 
         <div className='flex items-center gap-2 text-xs text-[var(--text-secondary)]'>
-          <span className='relative flex size-2'>
+          <span aria-hidden='true' className='relative flex size-2'>
             <span className='absolute inline-flex size-full animate-ping rounded-full bg-[var(--accent-green)] opacity-75' />
             <span className='relative inline-flex size-2 rounded-full bg-[var(--accent-green)]' />
           </span>
-          <span>Live</span>
+          <span>
+            <span className='sr-only'>Data feed status: </span>
+            Live
+          </span>
           <span className='hidden sm:inline'>
             · {format(new Date(), 'MMM d, yyyy')}
           </span>
