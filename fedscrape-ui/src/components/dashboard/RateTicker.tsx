@@ -77,7 +77,7 @@ export function RateTicker() {
     // doesn't announce a constantly-scrolling duplicate of the same data.
     <div
       aria-hidden='true'
-      className='fixed bottom-0 z-30 hidden h-9 w-full items-center overflow-hidden border-t border-white/5 bg-zinc-900 lg:flex'
+      className='fixed bottom-0 z-30 hidden h-9 w-full items-center overflow-hidden border-t border-[var(--border-subtle)] bg-[var(--bg-elevated)] lg:flex'
     >
       <div className='ticker-track flex w-max'>
         {track('a')}
