@@ -81,12 +81,21 @@ async def test_spread_unknown_rate_returns_404(client):
 
 
 @pytest.mark.asyncio
+
+async def test_snapshot_missing_date_returns_422(client):
+    response = await client.get("/rates/snapshot")
+
 async def test_rate_series_end_without_start_returns_422(client):
     response = await client.get("/rates/federal_funds?end=2024-01-01")
+
     assert response.status_code == 422
 
 
 @pytest.mark.asyncio
+async def test_snapshot_without_db(client):
+    # Same no-DB tolerance pattern as test_latest_rates_without_db.
+    try:
+        response = await client.get("/rates/snapshot?date=2024-01-01")
 async def test_rate_series_with_date_range_without_db(client):
     # Same no-DB tolerance pattern as test_latest_rates_without_db.
     try:
@@ -99,6 +108,37 @@ async def test_rate_series_with_date_range_without_db(client):
 
 
 @pytest.mark.asyncio
+async def test_snapshot_returns_closest_prior_complete_record(async_client):
+    from db.session import AsyncSessionLocal
+
+    async with AsyncSessionLocal() as session:
+        # Incomplete record (no treasury_10y) — must be skipped even though
+        # it's the closest date to the query.
+        await upsert_record(
+            session,
+            RateRecord(date=datetime.date(2024, 3, 15), federal_funds="5.00"),
+        )
+        # Complete record further back — this is the one that should win.
+        await upsert_record(
+            session,
+            RateRecord(
+                date=datetime.date(2024, 3, 10),
+                federal_funds="5.00",
+                treasury_10y="4.20",
+            ),
+        )
+
+    response = await async_client.get("/rates/snapshot?date=2024-03-20")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["date"] == "2024-03-10"
+    assert body["treasury_10y"] == "4.20"
+
+
+@pytest.mark.asyncio
+async def test_snapshot_returns_404_when_no_prior_data(async_client):
+    response = await async_client.get("/rates/snapshot?date=1999-01-01")
+    assert response.status_code == 404
 async def test_rate_series_date_range_filters_and_orders_oldest_first(async_client):
     from db.session import AsyncSessionLocal
 

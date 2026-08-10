@@ -19,7 +19,13 @@ from api.models.rate import (
     SpreadResponse,
 )
 from api.services.scraper import scrape_latest
-from db.crud import get_average, get_latest, get_series, upsert_records
+from db.crud import (
+    get_average,
+    get_latest,
+    get_series,
+    get_snapshot_for_date,
+    upsert_records,
+)
 from db.models import RATE_TYPES
 from db.session import get_session
 
@@ -80,6 +86,32 @@ async def yield_spread(
         date=record.date, rate_a=rate_a, rate_b=rate_b, spread=spread
     )
     await cache_set(cache_key, result.model_dump(mode="json"))
+    return result
+
+
+@router.get("/snapshot", response_model=RateResponse)
+@limiter.limit("60/minute")
+async def rate_snapshot(
+    request: Request,
+    date: datetime.date = Query(
+        ..., description="Target date (nearest prior trading day is used)"
+    ),
+    session: AsyncSession = Depends(get_session),
+):
+    """Return the full rate record closest to (on or before) the given date."""
+    cache_key = f"rates:snapshot:{date}"
+    cached = await cache_get(cache_key)
+    if cached is not None:
+        return cached
+
+    record = await get_snapshot_for_date(session, date)
+    if record is None:
+        raise HTTPException(
+            status_code=404, detail=f"No rate data available on or before {date}."
+        )
+
+    result = RateResponse.model_validate(record).model_dump(mode="json")
+    await cache_set(cache_key, result)
     return result
 
 
