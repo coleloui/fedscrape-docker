@@ -183,20 +183,38 @@ async def rate_series(
     request: Request,
     rate_type: str,
     limit: int = Query(
-        30, ge=1, le=365, description="Number of recent records to return"
+        30, ge=1, le=5000, description="Number of recent records to return"
+    ),
+    start: datetime.date | None = Query(
+        None, description="Return records from this date onward (overrides limit)"
+    ),
+    end: datetime.date | None = Query(
+        None, description="Return records up to this date (requires start)"
     ),
     session: AsyncSession = Depends(get_session),
 ):
-    """Return a time series for a single rate type."""
+    """Return a time series for a single rate type.
+
+    Pass `start` (optionally with `end`) to fetch a date range instead of
+    a trailing window — `limit` is ignored in that case.
+    """
     if rate_type not in RATE_TYPES:
         raise HTTPException(status_code=404, detail=f"Unknown rate type: {rate_type!r}")
+    if end is not None and start is None:
+        raise HTTPException(
+            status_code=422, detail="`end` requires `start` to also be set."
+        )
 
-    cache_key = f"rates:series:{rate_type}:{limit}"
+    cache_key = (
+        f"rates:series:{rate_type}:{start}:{end}"
+        if start is not None
+        else f"rates:series:{rate_type}:{limit}"
+    )
     cached = await cache_get(cache_key)
     if cached is not None:
         return cached
 
-    rows = await get_series(session, rate_type, limit)
+    rows = await get_series(session, rate_type, limit, start=start, end=end)
     result = RateSeriesResponse(
         rate_type=rate_type,
         data=[RateSeriesEntry(date=r["date"], value=r["value"]) for r in rows],
