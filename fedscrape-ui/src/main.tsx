@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
+import './styles/glass.css'
 import './api/config' // Initialize API configuration
 import App from './App.tsx'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
