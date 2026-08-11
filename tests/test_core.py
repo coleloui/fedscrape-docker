@@ -81,13 +81,14 @@ async def test_spread_unknown_rate_returns_404(client):
 
 
 @pytest.mark.asyncio
-
 async def test_snapshot_missing_date_returns_422(client):
     response = await client.get("/rates/snapshot")
+    assert response.status_code == 422
 
+
+@pytest.mark.asyncio
 async def test_rate_series_end_without_start_returns_422(client):
     response = await client.get("/rates/federal_funds?end=2024-01-01")
-
     assert response.status_code == 422
 
 
@@ -96,6 +97,12 @@ async def test_snapshot_without_db(client):
     # Same no-DB tolerance pattern as test_latest_rates_without_db.
     try:
         response = await client.get("/rates/snapshot?date=2024-01-01")
+        assert response.status_code in (200, 404, 500, 503)
+    except Exception:
+        pass
+
+
+@pytest.mark.asyncio
 async def test_rate_series_with_date_range_without_db(client):
     # Same no-DB tolerance pattern as test_latest_rates_without_db.
     try:
@@ -139,6 +146,9 @@ async def test_snapshot_returns_closest_prior_complete_record(async_client):
 async def test_snapshot_returns_404_when_no_prior_data(async_client):
     response = await async_client.get("/rates/snapshot?date=1999-01-01")
     assert response.status_code == 404
+
+
+@pytest.mark.asyncio
 async def test_rate_series_date_range_filters_and_orders_oldest_first(async_client):
     from db.session import AsyncSessionLocal
 
