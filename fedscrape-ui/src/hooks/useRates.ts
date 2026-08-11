@@ -76,31 +76,6 @@ export function useRateSnapshot(date: string) {
   })
 }
 
-export function useRateSeriesRange(rateType: string, start: string, end?: string) {
-  return useQuery({
-    queryKey: queryKeys.rateSeriesRange(rateType, start, end),
-    queryFn: async () =>
-      (
-        await rateSeriesRatesRateTypeGet({
-          path: { rate_type: rateType },
-          query: { start, end },
-        })
-      ).data,
-    staleTime: RATES_STALE_TIME,
-    enabled: Boolean(rateType) && Boolean(start),
-  })
-}
-
-export function useRateSnapshot(date: string) {
-  return useQuery({
-    queryKey: queryKeys.rateSnapshot(date),
-    queryFn: async () =>
-      (await rateSnapshotRatesSnapshotGet({ query: { date } })).data,
-    staleTime: 24 * 60 * 60 * 1000,
-    enabled: Boolean(date),
-  })
-}
-
 export function useRateAverage(rateType: string, days: number = 30) {
   return useQuery({
     queryKey: queryKeys.rateAverage(rateType, days),
