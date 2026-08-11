@@ -14,6 +14,7 @@ _redis: Optional[aioredis.Redis] = None
 
 
 async def get_redis() -> aioredis.Redis:
+    """Return a shared async Redis client, creating it on first use."""
     global _redis
     if _redis is None:
         _redis = aioredis.from_url(settings.REDIS_URL, decode_responses=True)
