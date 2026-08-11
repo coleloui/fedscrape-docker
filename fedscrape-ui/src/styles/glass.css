@@ -7,6 +7,8 @@
   --bg-base: #09090b; /* zinc-950 — page background */
   --bg-surface: rgba(255, 255, 255, 0.04); /* glass panel base */
   --bg-surface-hover: rgba(255, 255, 255, 0.07);
+  --bg-elevated: #18181b; /* zinc-900 — tooltips, ticker bar (opaque, no blur) */
+  --border-subtle: rgba(255, 255, 255, 0.1); /* plain hairline border color */
 
   /* Glass effect */
   --glass-blur: blur(16px);
@@ -19,7 +21,9 @@
   --accent-blue: #3b82f6; /* blue-500 */
   --accent-blue-dim: rgba(59, 130, 246, 0.15);
   --accent-green: #22c55e; /* green-500 — positive values */
+  --accent-green-dim: rgba(34, 197, 94, 0.12);
   --accent-red: #ef4444; /* red-500 — negative/inverted */
+  --accent-red-dim: rgba(239, 68, 68, 0.12);
   --accent-amber: #f59e0b; /* amber-500 — AI panel accent */
 
   /* Text */
@@ -35,6 +39,19 @@
   --chart-prime: #ec4899; /* pink — Prime Rate */
   --chart-grid: rgba(255, 255, 255, 0.06);
   --chart-axis: #52525b;
+
+  /* Yield-curve chart colors (deliberately lighter "-400" shades, distinct
+     from the --accent-* / --chart-* tokens above, used only by the two
+     yield-curve panels) */
+  --chart-curve-short: #60a5fa; /* blue-400 — short end / today */
+  --chart-curve-long: #22d3ee; /* cyan-400 — long end */
+  --chart-curve-inverted: #f87171; /* red-400 — inverted curve */
+  --chart-curve-1y-ago: #a78bfa; /* violet-400 */
+  /* 2-years-ago line reuses --text-secondary (zinc-400, identical value) */
+
+  /* Chat bubbles */
+  --chat-user-bubble: #2563eb; /* blue-600 */
+  --chat-assistant-bubble: #27272a; /* zinc-800 */
 }
 
 .glass-panel {
