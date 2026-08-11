@@ -4,6 +4,7 @@ import {
   listRateTypesRatesTypesGet,
   rateAverageRatesRateTypeAverageGet,
   rateSeriesRatesRateTypeGet,
+  rateSnapshotRatesSnapshotGet,
   yieldSpreadRatesSpreadGet,
 } from '@/api/generated'
 import { queryKeys } from '@/lib/queryKeys'
@@ -26,7 +27,11 @@ export function useRateTypes() {
   })
 }
 
-export function useRateSeries(rateType: string, limit: number = 30) {
+export function useRateSeries(
+  rateType: string,
+  limit: number = 30,
+  options: { enabled?: boolean } = {},
+) {
   return useQuery({
     queryKey: queryKeys.rateSeries(rateType, limit),
     queryFn: async () =>
@@ -37,7 +42,37 @@ export function useRateSeries(rateType: string, limit: number = 30) {
         })
       ).data,
     staleTime: RATES_STALE_TIME,
-    enabled: Boolean(rateType),
+    enabled: Boolean(rateType) && (options.enabled ?? true),
+  })
+}
+
+export function useRateSeriesRange(
+  rateType: string,
+  start: string,
+  end?: string,
+  options: { enabled?: boolean } = {},
+) {
+  return useQuery({
+    queryKey: queryKeys.rateSeriesRange(rateType, start, end),
+    queryFn: async () =>
+      (
+        await rateSeriesRatesRateTypeGet({
+          path: { rate_type: rateType },
+          query: { start, end },
+        })
+      ).data,
+    staleTime: RATES_STALE_TIME,
+    enabled: Boolean(rateType) && Boolean(start) && (options.enabled ?? true),
+  })
+}
+
+export function useRateSnapshot(date: string) {
+  return useQuery({
+    queryKey: queryKeys.rateSnapshot(date),
+    queryFn: async () =>
+      (await rateSnapshotRatesSnapshotGet({ query: { date } })).data,
+    staleTime: 24 * 60 * 60 * 1000,
+    enabled: Boolean(date),
   })
 }
 
