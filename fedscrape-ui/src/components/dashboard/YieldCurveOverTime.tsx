@@ -39,19 +39,19 @@ const SNAPSHOTS: Snapshot[] = [
   {
     seriesKey: 'today',
     legendLabel: 'Today',
-    color: '#60a5fa', // blue-400
+    color: 'var(--chart-curve-short)',
     date: format(new Date(), 'yyyy-MM-dd'),
   },
   {
     seriesKey: 'oneYearAgo',
     legendLabel: '1 Year Ago',
-    color: '#a78bfa', // violet-400
+    color: 'var(--chart-curve-1y-ago)',
     date: format(subYears(new Date(), 1), 'yyyy-MM-dd'),
   },
   {
     seriesKey: 'twoYearsAgo',
     legendLabel: '2 Years Ago',
-    color: '#a1a1aa', // zinc-400
+    color: 'var(--text-secondary)', // zinc-400, same value used for "2 years ago"
     date: format(subYears(new Date(), 2), 'yyyy-MM-dd'),
   },
 ]
@@ -74,7 +74,7 @@ function CurveOverTimeTooltip({
 }) {
   if (!active || !payload?.length) return null
   return (
-    <div className='rounded-md border border-white/10 bg-zinc-900 px-3 py-2 text-xs shadow-lg'>
+    <div className='rounded-md border border-[var(--border-subtle)] bg-[var(--bg-elevated)] px-3 py-2 text-xs shadow-lg'>
       <div className='mb-1 text-[var(--text-secondary)]'>{label}</div>
       {payload.map(entry => {
         const snapshot = SNAPSHOTS.find(s => s.seriesKey === entry.dataKey)

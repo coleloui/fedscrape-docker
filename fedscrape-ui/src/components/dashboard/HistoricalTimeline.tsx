@@ -13,6 +13,7 @@ import {
 import { useRateSeries, useRateSeriesRange } from '@/hooks/useRates'
 import { AXIS_STYLE, GRID_STYLE } from '@/lib/chartConfig'
 import { formatDate, parseRateValue } from '@/lib/formatters'
+import { Button } from '@/components/ui/button'
 import type { RateSeriesEntry } from '@/types/rates'
 
 type RangeKey = 'Live' | '1M' | '1Y' | '5Y' | 'All'
@@ -112,7 +113,7 @@ function TimelineTooltip({
 }) {
   if (!active || !payload?.length) return null
   return (
-    <div className='rounded-md border border-white/10 bg-zinc-900 px-3 py-2 text-xs shadow-lg'>
+    <div className='rounded-md border border-[var(--border-subtle)] bg-[var(--bg-elevated)] px-3 py-2 text-xs shadow-lg'>
       <div className='mb-1 text-[var(--text-secondary)]'>
         {label ? formatDate(label) : ''}
       </div>
@@ -157,21 +158,23 @@ export function HistoricalTimeline() {
         </h2>
         <div role='tablist' aria-label='Time range' className='flex gap-1'>
           {RANGE_TABS.map(tab => (
-            <button
+            <Button
               key={tab}
               id={`timeline-tab-${tab}`}
               role='tab'
               aria-selected={range === tab}
               aria-controls='timeline-panel'
               onClick={() => setRange(tab)}
-              className={`rounded-full px-3 py-1 text-xs transition-colors duration-200 ${
+              variant='ghost'
+              size='sm'
+              className={`rounded-full ${
                 range === tab
-                  ? 'bg-[var(--accent-blue-dim)] text-[var(--accent-blue)]'
-                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                  ? 'bg-[var(--accent-blue-dim)] text-[var(--accent-blue)] hover:bg-[var(--accent-blue-dim)] hover:text-[var(--accent-blue)]'
+                  : 'text-[var(--text-secondary)] hover:bg-transparent hover:text-[var(--text-primary)]'
               }`}
             >
               {tab}
-            </button>
+            </Button>
           ))}
         </div>
       </div>
