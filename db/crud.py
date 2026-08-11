@@ -45,14 +45,50 @@ async def get_by_date(session: AsyncSession, d: datetime.date) -> Optional[RateR
     return result.scalar_one_or_none()
 
 
-async def get_series(
-    session: AsyncSession, rate_type: str, limit: int = 30
-) -> list[dict]:
-    """Return the most recent `limit` (date, value) pairs for one rate type."""
-    rate_col = col(getattr(RateRecord, rate_type))
+async def get_snapshot_for_date(
+    session: AsyncSession, target_date: datetime.date
+) -> Optional[RateRecord]:
+    """Return the closest full record on or before `target_date`.
+
+    Only considers records with a non-null `treasury_10y`, matching
+    `get_latest`'s definition of a "complete" record — this is used for
+    yield-curve snapshots, which need every maturity populated.
+    """
     result = await session.execute(
-        select(RateRecord.date, rate_col).order_by(desc(RateRecord.date)).limit(limit)
+        select(RateRecord)
+        .where(RateRecord.date <= target_date)
+        .where(RateRecord.treasury_10y.isnot(None))
+        .order_by(desc(RateRecord.date))
+        .limit(1)
     )
+    return result.scalar_one_or_none()
+
+
+async def get_series(
+    session: AsyncSession,
+    rate_type: str,
+    limit: int = 30,
+    start: Optional[datetime.date] = None,
+    end: Optional[datetime.date] = None,
+) -> list[dict]:
+    """Return (date, value) pairs for one rate type.
+
+    When `start` is given, returns every record with `date >= start` (and
+    `date <= end` if also given), ordered oldest-to-newest, ignoring
+    `limit`. Otherwise returns the most recent `limit` records, newest
+    first — the original trailing-window behavior.
+    """
+    rate_col = col(getattr(RateRecord, rate_type))
+    if start is not None:
+        stmt = select(RateRecord.date, col).where(RateRecord.date >= start)
+        if end is not None:
+            stmt = stmt.where(RateRecord.date <= end)
+        stmt = stmt.order_by(RateRecord.date)
+        result = await session.execute(stmt)
+    else:
+        result = await session.execute(
+            select(RateRecord.date, col).order_by(desc(RateRecord.date)).limit(limit)
+        )
     return [{"date": row[0], "value": row[1]} for row in result.all()]
 
 

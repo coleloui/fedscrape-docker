@@ -1,0 +1,94 @@
+/* Liquid Glass design system — used only by the Dashboard2 terminal layout.
+   Separate from index.css's shadcn tokens by design: this is a distinct
+   dark-terminal aesthetic scoped to the new dashboard, not a replacement
+   for the app-wide token set. */
+:root {
+  /* Base */
+  --bg-base: #09090b; /* zinc-950 — page background */
+  --bg-surface: rgba(255, 255, 255, 0.04); /* glass panel base */
+  --bg-surface-hover: rgba(255, 255, 255, 0.07);
+  --bg-elevated: #18181b; /* zinc-900 — tooltips, ticker bar (opaque, no blur) */
+  --border-subtle: rgba(255, 255, 255, 0.1); /* plain hairline border color */
+
+  /* Glass effect */
+  --glass-blur: blur(20px) saturate(160%);
+  --glass-border: 1px solid rgba(255, 255, 255, 0.1);
+  --glass-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+  --glass-sheen: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.14) 0%,
+    rgba(255, 255, 255, 0.03) 28%,
+    transparent 55%
+  );
+
+  /* Accents */
+  --accent-blue: #3b82f6; /* blue-500 */
+  --accent-blue-dim: rgba(59, 130, 246, 0.15);
+  --accent-green: #22c55e; /* green-500 — positive values */
+  --accent-green-dim: rgba(34, 197, 94, 0.12);
+  --accent-red: #ef4444; /* red-500 — negative/inverted */
+  --accent-red-dim: rgba(239, 68, 68, 0.12);
+  --accent-amber: #f59e0b; /* amber-500 — AI panel accent */
+
+  /* Text */
+  --text-primary: #f4f4f5; /* zinc-100 */
+  --text-secondary: #a1a1aa; /* zinc-400 */
+  --text-muted: #52525b; /* zinc-600 */
+
+  /* Chart colors */
+  --chart-ffr: #3b82f6; /* blue — Fed Funds */
+  --chart-2y: #8b5cf6; /* violet — 2Y Treasury */
+  --chart-10y: #06b6d4; /* cyan — 10Y Treasury */
+  --chart-30y: #f59e0b; /* amber — 30Y Treasury */
+  --chart-prime: #ec4899; /* pink — Prime Rate */
+  --chart-grid: rgba(255, 255, 255, 0.06);
+  --chart-axis: #52525b;
+
+  /* Yield-curve chart colors (deliberately lighter "-400" shades, distinct
+     from the --accent-* / --chart-* tokens above, used only by the two
+     yield-curve panels) */
+  --chart-curve-short: #60a5fa; /* blue-400 — short end / today */
+  --chart-curve-long: #22d3ee; /* cyan-400 — long end */
+  --chart-curve-inverted: #f87171; /* red-400 — inverted curve */
+  --chart-curve-1y-ago: #a78bfa; /* violet-400 */
+  /* 2-years-ago line reuses --text-secondary (zinc-400, identical value) */
+
+  /* Chat bubbles */
+  --chat-user-bubble: #2563eb; /* blue-600 */
+  --chat-assistant-bubble: #27272a; /* zinc-800 */
+}
+
+.glass-panel {
+  background: var(--glass-sheen), var(--bg-surface);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  border-radius: 16px;
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.ticker-track {
+  animation: marquee 30s linear infinite;
+}
+
+.ticker-track:hover {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ticker-track {
+    animation: none;
+  }
+}

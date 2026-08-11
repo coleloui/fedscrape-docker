@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { ChatChatPostData, ChatChatPostErrors, ChatChatPostResponses, HealthHealthGetData, HealthHealthGetResponses, LatestRatesRatesLatestGetData, LatestRatesRatesLatestGetResponses, ListRateTypesRatesTypesGetData, ListRateTypesRatesTypesGetResponses, RateAverageRatesRateTypeAverageGetData, RateAverageRatesRateTypeAverageGetErrors, RateAverageRatesRateTypeAverageGetResponses, RateSeriesRatesRateTypeGetData, RateSeriesRatesRateTypeGetErrors, RateSeriesRatesRateTypeGetResponses, RefreshRatesRatesRefreshPostData, RefreshRatesRatesRefreshPostResponses, YieldSpreadRatesSpreadGetData, YieldSpreadRatesSpreadGetErrors, YieldSpreadRatesSpreadGetResponses } from './types.gen';
+import type { ChatChatPostData, ChatChatPostErrors, ChatChatPostResponses, HealthHealthGetData, HealthHealthGetResponses, LatestRatesRatesLatestGetData, LatestRatesRatesLatestGetResponses, ListRateTypesRatesTypesGetData, ListRateTypesRatesTypesGetResponses, RateAverageRatesRateTypeAverageGetData, RateAverageRatesRateTypeAverageGetErrors, RateAverageRatesRateTypeAverageGetResponses, RateSeriesRatesRateTypeGetData, RateSeriesRatesRateTypeGetErrors, RateSeriesRatesRateTypeGetResponses, RateSnapshotRatesSnapshotGetData, RateSnapshotRatesSnapshotGetErrors, RateSnapshotRatesSnapshotGetResponses, RefreshRatesRatesRefreshPostData, RefreshRatesRatesRefreshPostResponses, YieldSpreadRatesSpreadGetData, YieldSpreadRatesSpreadGetErrors, YieldSpreadRatesSpreadGetResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -45,6 +45,13 @@ export const latestRatesRatesLatestGet = <ThrowOnError extends boolean = true>(o
 export const yieldSpreadRatesSpreadGet = <ThrowOnError extends boolean = true>(options: Options<YieldSpreadRatesSpreadGetData, ThrowOnError>): RequestResult<YieldSpreadRatesSpreadGetResponses, YieldSpreadRatesSpreadGetErrors, ThrowOnError> => (options.client ?? client).get<YieldSpreadRatesSpreadGetResponses, YieldSpreadRatesSpreadGetErrors, ThrowOnError>({ url: '/rates/spread', ...options });
 
 /**
+ * Rate Snapshot
+ *
+ * Return the full rate record closest to (on or before) the given date.
+ */
+export const rateSnapshotRatesSnapshotGet = <ThrowOnError extends boolean = true>(options: Options<RateSnapshotRatesSnapshotGetData, ThrowOnError>): RequestResult<RateSnapshotRatesSnapshotGetResponses, RateSnapshotRatesSnapshotGetErrors, ThrowOnError> => (options.client ?? client).get<RateSnapshotRatesSnapshotGetResponses, RateSnapshotRatesSnapshotGetErrors, ThrowOnError>({ url: '/rates/snapshot', ...options });
+
+/**
  * Refresh Rates
  *
  * Scrape the latest Fed H.15 data and upsert into the database.
@@ -69,6 +76,9 @@ export const rateAverageRatesRateTypeAverageGet = <ThrowOnError extends boolean 
  * Rate Series
  *
  * Return a time series for a single rate type.
+ *
+ * Pass `start` (optionally with `end`) to fetch a date range instead of
+ * a trailing window — `limit` is ignored in that case.
  */
 export const rateSeriesRatesRateTypeGet = <ThrowOnError extends boolean = true>(options: Options<RateSeriesRatesRateTypeGetData, ThrowOnError>): RequestResult<RateSeriesRatesRateTypeGetResponses, RateSeriesRatesRateTypeGetErrors, ThrowOnError> => (options.client ?? client).get<RateSeriesRatesRateTypeGetResponses, RateSeriesRatesRateTypeGetErrors, ThrowOnError>({ url: '/rates/{rate_type}', ...options });
 
