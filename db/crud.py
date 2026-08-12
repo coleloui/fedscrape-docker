@@ -80,14 +80,16 @@ async def get_series(
     """
     rate_col = col(getattr(RateRecord, rate_type))
     if start is not None:
-        stmt = select(RateRecord.date, col).where(RateRecord.date >= start)
+        stmt = select(RateRecord.date, rate_col).where(RateRecord.date >= start)
         if end is not None:
             stmt = stmt.where(RateRecord.date <= end)
         stmt = stmt.order_by(RateRecord.date)
         result = await session.execute(stmt)
     else:
         result = await session.execute(
-            select(RateRecord.date, col).order_by(desc(RateRecord.date)).limit(limit)
+            select(RateRecord.date, rate_col)
+            .order_by(desc(RateRecord.date))
+            .limit(limit)
         )
     return [{"date": row[0], "value": row[1]} for row in result.all()]
 
