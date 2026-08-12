@@ -3,7 +3,7 @@ from typing import Optional
 
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlmodel import desc, select
+from sqlmodel import col, desc, select
 
 from db.models import RateRecord
 
@@ -29,9 +29,9 @@ async def get_latest(session: AsyncSession) -> Optional[RateRecord]:
     """Return the most recent record where all core Treasury rates are present."""
     result = await session.execute(
         select(RateRecord)
-        .where(RateRecord.treasury_10y.isnot(None))
-        .where(RateRecord.treasury_2y.isnot(None))
-        .where(RateRecord.treasury_1y.isnot(None))
+        .where(col(RateRecord.treasury_10y).is_not(None))
+        .where(col(RateRecord.treasury_2y).is_not(None))
+        .where(col(RateRecord.treasury_1y).is_not(None))
         .order_by(desc(RateRecord.date))
         .limit(1)
     )
@@ -78,16 +78,18 @@ async def get_series(
     `limit`. Otherwise returns the most recent `limit` records, newest
     first — the original trailing-window behavior.
     """
-    col = getattr(RateRecord, rate_type)
+    rate_col = col(getattr(RateRecord, rate_type))
     if start is not None:
-        stmt = select(RateRecord.date, col).where(RateRecord.date >= start)
+        stmt = select(RateRecord.date, rate_col).where(RateRecord.date >= start)
         if end is not None:
             stmt = stmt.where(RateRecord.date <= end)
         stmt = stmt.order_by(RateRecord.date)
         result = await session.execute(stmt)
     else:
         result = await session.execute(
-            select(RateRecord.date, col).order_by(desc(RateRecord.date)).limit(limit)
+            select(RateRecord.date, rate_col)
+            .order_by(desc(RateRecord.date))
+            .limit(limit)
         )
     return [{"date": row[0], "value": row[1]} for row in result.all()]
 
@@ -96,11 +98,11 @@ async def get_average(
     session: AsyncSession, rate_type: str, days: int = 30
 ) -> Optional[float]:
     """Return the mean of the most recent `days` non-null values for a rate type."""
-    col = getattr(RateRecord, rate_type)
+    rate_col = col(getattr(RateRecord, rate_type))
     result = await session.execute(
-        select(col)
-        .where(col.isnot(None))
-        .where(col != "n.a.")
+        select(rate_col)
+        .where(rate_col.is_not(None))
+        .where(rate_col != "n.a.")
         .order_by(desc(RateRecord.date))
         .limit(days)
     )
