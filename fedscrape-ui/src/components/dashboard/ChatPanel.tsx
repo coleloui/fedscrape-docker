@@ -50,7 +50,7 @@ export function ChatConversationBody({
   }, [messages, isPending])
 
   return (
-    <div className='flex h-full flex-col'>
+    <div className='flex min-h-0 flex-1 flex-col'>
       <p className='px-4 pt-3 text-xs italic text-[var(--accent-amber)] opacity-70'>
         For informational purposes only. Not financial advice. Use any
         information at your own risk.

@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { MessageCircle } from 'lucide-react'
 import { TopBar } from '@/components/layout/TopBar'
 import { RateCardsRow } from '@/components/dashboard/RateCardsRow'
-import { RateTicker } from '@/components/dashboard/RateTicker'
 import { HistoricalTimeline } from '@/components/dashboard/HistoricalTimeline'
 import { RateOfChange } from '@/components/dashboard/RateOfChange'
 import { YieldCurveSnapshot } from '@/components/dashboard/YieldCurveSnapshot'
@@ -17,7 +16,7 @@ export function Dashboard2() {
   const [isChatOpen, setIsChatOpen] = useState(false)
 
   return (
-    <div className='min-h-screen bg-[var(--bg-base)] pb-16 lg:pb-10'>
+    <div className='min-h-screen bg-[var(--bg-base)] pb-16 lg:pb-10 rounded-none'>
       <TopBar />
 
       <main className='mx-auto max-w-[1600px] px-4 py-6'>
@@ -55,7 +54,6 @@ export function Dashboard2() {
         onClose={() => setIsChatOpen(false)}
       />
 
-      <RateTicker />
     </div>
   )
 }
