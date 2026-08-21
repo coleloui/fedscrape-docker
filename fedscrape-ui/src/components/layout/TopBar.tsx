@@ -2,7 +2,7 @@ import { format } from 'date-fns'
 
 export function TopBar() {
   return (
-    <header className='glass-panel sticky top-0 z-40 rounded-none border-x-0 border-t-0'>
+    <header className='glass-panel rounded-none! sticky top-0 z-40 border-x-0 border-t-0'>
       <div className='mx-auto flex max-w-[1600px] items-center gap-4 px-4 py-3'>
         <h1 className='font-mono text-sm font-semibold text-[var(--text-primary)]'>
           FedRate
